@@ -15,15 +15,25 @@
 	#define TIMER_TICK_TIME_LOAD_VALUE (TICKTIME * 16 / CLK_DIV) // tick time * 16 CLK per us / clock divider 
 #endif
 
+typedef enum {READY, RUNNING, WAITING, DONE} taskState;
+
+
 struct Task
 {
-	int taskID;
-	int priority;
+	
+	uint8_t taskID;
 	void* taskFunction(void); 
+	taskState state; 
+	uint16_t* stackPointer; 
+	uint16_t programCounter;
+	void* data; 
+
 	};
 
 // function prototypes
 void tickTimerSetup();
+
+Task taskArray[16];
 
 int main(void)
 {
