@@ -18,25 +18,28 @@
 typedef enum {READY, RUNNING, WAITING, DONE} taskState;
 
 
-struct Task
+typedef struct
 {
 	
 	uint8_t taskID;
-	void* taskFunction(void); 
+	void (*taskFunction)(void);
 	taskState state; 
 	uint16_t* stackPointer; 
 	uint16_t programCounter;
 	void* data; 
 
-	};
+} Task;
 
 // function prototypes
 void tickTimerSetup();
+
+extern void os(void);
 
 Task taskArray[16];
 
 int main(void)
 {
+	DDRE |= 1 << 0;		// heartbeat pin
 	DDRB |= 1 << 5;
 	
 	tickTimerSetup();
@@ -59,7 +62,9 @@ void tickTimerSetup(){
 
 ISR(TIMER4_COMPA_vect){
 	// heartbeat 
-	PINB |= 1 << 5;
-	
+	PINE |= 1 << 0;
+	os();
 	
 }
+
+

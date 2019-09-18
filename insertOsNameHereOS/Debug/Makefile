@@ -40,22 +40,27 @@ C_SRCS +=  \
 ../main.c
 
 
-PREPROCESSING_SRCS += 
+PREPROCESSING_SRCS +=  \
+../os.s
 
 
 ASM_SRCS += 
 
 
 OBJS +=  \
+os.o \
 main.o
 
 OBJS_AS_ARGS +=  \
+os.o \
 main.o
 
 C_DEPS +=  \
+os.d \
 main.d
 
 C_DEPS_AS_ARGS +=  \
+os.d \
 main.d
 
 OUTPUT_FILE_PATH +=insertOsNameHereOS.elf
@@ -87,6 +92,13 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU Assembler
+./os.o: .././os.s
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU Assembler : 5.4.0
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE) -Wa,-gdwarf2 -x assembler-with-cpp -c -mmcu=atmega328pb -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\gcc\dev\atmega328pb" -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\include"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 
 
 
