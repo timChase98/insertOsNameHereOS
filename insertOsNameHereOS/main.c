@@ -15,6 +15,13 @@
 	#define TIMER_TICK_TIME_LOAD_VALUE (TICKTIME * 16 / CLK_DIV) // tick time * 16 CLK per us / clock divider 
 #endif
 
+struct Task
+{
+	int taskID;
+	int priority;
+	void* taskFunction(void); 
+	};
+
 // function prototypes
 void tickTimerSetup();
 
