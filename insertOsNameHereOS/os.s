@@ -25,3 +25,5 @@ TIMER4_COMPA_vect:
 
 
     reti										;and done
+; fuck git on windows
+
