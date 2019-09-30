@@ -6,7 +6,7 @@
  *  Author: tchase
  */
   #include <avr/io.h>
-
+  .include "m328pbdef.inc"
   .equ STARTOFTASKLIST, 0x0100
 
 
@@ -20,15 +20,15 @@ os:
 
 TIMER4_COMPA_vect:
   ; save the status of the processor
-  PUSH SREG; save the status register
   PUSH R0;
          ; R1 is zero and doenst need to be saved
+  IN R1, _SFR_IO_ADDR(SREG); save the status register
+  PUSH R1
   PUSH ZL; save the Z register
   PUSH ZH
 
   ; stack grows downward. to get something from from 4 pushes ago add 4 to SP
-  MOV ZL, SPL; copy the stack pointer to the Z register
-  MOV ZH, SPH
+  MOVW Z, SP; copy the stack pointer to the Z register
   ADIW Z, 4; points to PC - 4, pushed PC from before call to interrupt
   LD R0, Z+; get low byte and increment
   LD R1, Z; get high byte
@@ -37,8 +37,10 @@ TIMER4_COMPA_vect:
   POP ZH
   POP ZL
   CLR R1; clear R1 to zero
+  POP R1; get SREG from stack 
+  OUT _SFR_IO_ADDR(SREG), R1
+  CLR R1
   POP R0
-  POP SREG;
   reti
 
 
