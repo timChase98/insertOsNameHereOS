@@ -6,6 +6,7 @@
  *  Author: tchase
  */
   #include <avr/io.h>
+
   .equ STARTOFTASKLIST, 0x0100
 
 
@@ -18,10 +19,13 @@ os:
 .global TIMER4_COMPA_vect
 
 TIMER4_COMPA_vect:
-	pop R18;  get PC from stack
-	pop R19
+  push ZL; save value of Z register
+  push ZH
+  inc SP; Increment Stack pointer twice to get value from before pushing Z
+  inc SP
+  pop ZL; get PC from before interrupt vector call
+  pop ZH
+  SUBI SP, 2; decrement SP by two
+
 	sbi		 _SFR_IO_ADDR(PINE),0				;toggle PE.0
-
-
-
-    reti										;and done
+  reti									           	;and done
