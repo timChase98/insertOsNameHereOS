@@ -19,13 +19,42 @@ os:
 .global TIMER4_COMPA_vect
 
 TIMER4_COMPA_vect:
-  push ZL; save value of Z register
-  push ZH
-  inc SP; Increment Stack pointer twice to get value from before pushing Z
-  inc SP
-  pop ZL; get PC from before interrupt vector call
-  pop ZH
-  SUBI SP, 2; decrement SP by two
+  ; save the status of the processor
+  PUSH SREG; save the status register
+  PUSH R0;
+         ; R1 is zero and doenst need to be saved
+  PUSH ZL; save the Z register
+  PUSH ZH
 
-	sbi		 _SFR_IO_ADDR(PINE),0				;toggle PE.0
-  reti									           	;and done
+  ; stack grows downward. to get something from from 4 pushes ago add 4 to SP
+  MOV ZL, SPL; copy the stack pointer to the Z register
+  MOV ZH, SPH
+  ADIW Z, 4; points to PC - 4, pushed PC from before call to interrupt
+  LD R0, Z+; get low byte and increment
+  LD R1, Z; get high byte
+
+  ; Restore registers
+  POP ZH
+  POP ZL
+  CLR R1; clear R1 to zero
+  POP R0
+  POP SREG;
+  reti
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ;
