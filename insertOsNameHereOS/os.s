@@ -6,7 +6,6 @@
  *  Author: tchase
  */
   #include <avr/io.h>
-  .include "m328pbdef.inc"
   .equ STARTOFTASKLIST, 0x0100
 
 
@@ -28,7 +27,8 @@ TIMER4_COMPA_vect:
   PUSH ZH
 
   ; stack grows downward. to get something from from 4 pushes ago add 4 to SP
-  MOVW Z, SP; copy the stack pointer to the Z register
+  IN ZL, _SFR_IO_ADDR(SPL); copy the stack pointer to the Z register
+  IN ZH, _SFR_IO_ADDR(SPH);  
   ADIW Z, 4; points to PC - 4, pushed PC from before call to interrupt
   LD R0, Z+; get low byte and increment
   LD R1, Z; get high byte

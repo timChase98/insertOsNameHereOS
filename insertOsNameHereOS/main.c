@@ -62,7 +62,7 @@ int main(void)
     /* Replace with your application code */
     while (1) 
     {
-		i = i + 1;
+		i++;
     }
 }
 
