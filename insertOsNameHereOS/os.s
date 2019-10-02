@@ -47,10 +47,20 @@ TIMER4_COMPA_vect:
   LDI ZL, TASKCOUNTERADDR_L; load the address of the task counter into the pointer register  
   LDI ZH, TASKCOUNTERADDR_H 
   LD R17, Z+; get task counter
+  LD R18, Z; get number of tasks 
+  SBIW Z, 1; point back to task counter
+
 
   ; calculate address of current task structure
   LDI R16, 16
   MUL R17, R16; multiply task counter by 16 and put the result in R0 
+  INC R17; increment task counter
+  CP R17, R18
+  BRLO TaskNotOverflowed ; brach if lower 
+  CLR R17
+  TaskNotOverflowed:  
+  ST Z, R17
+
   LDI ZL, STARTOFTASKLIST_L + 10; stack pointer address in task list 
   LDI ZH, STARTOFTASKLIST_H
   ; task counter to offset 

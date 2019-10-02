@@ -23,7 +23,7 @@ typedef struct
 	
 	uint16_t taskID;
 	void (*taskFunction)(Task);
-	void (*isTaskReady)(void);
+	void (*placeHolder)(void);
 	taskState state; 
 	uint16_t* stackPointer; 
 	uint16_t programCounter;
@@ -35,21 +35,21 @@ typedef struct
 void tickTimerSetup();
 extern void os(uint16_t* pointerToTaskArray);
 //      void function named taskF with void parameter
-void createTask(void (*taskF)(void), uint8_t (*taskReady)(void));
+void createTask(void (*taskF)(void));
 
 void blinkyTaskFunction();
-uint8_t blinkyTaskIsReady();
 
 
 Task taskArray[16] __attribute__((address (0x100)));// at start of RAM 
 uint8_t taskCounter __attribute__((address (0x400))); // at start of OS VAR space 
-uint8_t numberOfTasks = 0; 
+uint8_t numberOfTasks __attribute__((address (0x401)));
 
 volatile uint8_t i = 0; 
 
 int main(void)
 {
 	taskCounter = 0;
+	numberOfTasks = 0; 
 	DDRE |= 1 << 0;		// heartbeat pin
 	DDRB |= 1 << 5;
 	
@@ -58,7 +58,7 @@ int main(void)
 	tickTimerSetup();
 	sei();
 	
-	createTask(blinkyTaskFunction, blinkyTaskIsReady); 
+	createTask(blinkyTaskFunction); 
 	
     /* Replace with your application code */
     while (1) 
@@ -75,11 +75,11 @@ void tickTimerSetup(){
 	TIMSK4 = 1 << OCIE4A; 
 }
 
-void createTask(void (*taskF)(void), uint8_t (*taskReady)(void)){
+void createTask(void (*taskF)(void)){
 	Task t = taskArray[numberOfTasks]; // get memory for task
 	t.taskID = numberOfTasks; // tasks start at 1
 	t.taskFunction = taskF;
-	t.isTaskReady = taskReady;
+	//t.isTaskReady = taskReady;
 	t.state = WAITING; 
 	t.programCounter = taskF;
 	
@@ -93,8 +93,4 @@ void blinkyTaskFunction(){
 	PINB |= 1 << 5; 
 }
 
-uint8_t blinkyTaskIsReady(){
-	return 1; 
-	
-}
 
