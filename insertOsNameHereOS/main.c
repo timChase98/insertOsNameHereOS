@@ -41,14 +41,15 @@ void blinkyTaskFunction();
 uint8_t blinkyTaskIsReady();
 
 
-Task taskArray[16] __attribute__((address (0x100)));
-uint8_t taskCounter = 0;
+Task taskArray[16] __attribute__((address (0x100)));// at start of RAM 
+uint8_t taskCounter __attribute__((address (0x400))); // at start of OS VAR space 
 uint8_t numberOfTasks = 0; 
 
 volatile uint8_t i = 0; 
 
 int main(void)
 {
+	taskCounter = 0;
 	DDRE |= 1 << 0;		// heartbeat pin
 	DDRB |= 1 << 5;
 	
