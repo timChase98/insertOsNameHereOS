@@ -33,16 +33,41 @@ TIMER4_COMPA_vect:
          ; R1 is zero and doenst need to be saved
   IN R1, _SFR_IO_ADDR(SREG); save the status register
   PUSH R1
+  PUSH R2
+  PUSH R3
+  PUSH R4
+  PUSH R5
+  PUSH R6
+  PUSH R7
+  PUSH R8
+  PUSH R9
+  PUSH R10
+  PUSH R11
+  PUSH R12
+  PUSH R13
+  PUSH R14
+  PUSH R15
   PUSH R16
   PUSH R17
   PUSH R18
-  PUSH ZL; save the Z register
-  PUSH ZH
+  PUSH R19
+  PUSH R20
+  PUSH R21
+  PUSH R22
+  PUSH R23
+  PUSH R24
+  PUSH R25
+  PUSH R26
+  PUSH R27
+  PUSH R28
+  PUSH R29
+  PUSH R30
+  PUSH R31
 
   ; stack grows downward. to get something from from 4 pushes ago add 4 to SP
   IN ZL, _SFR_IO_ADDR(SPL); copy the stack pointer to the Z register
   IN ZH, _SFR_IO_ADDR(SPH);
-  ADIW Z, 8; points to SP - 8, pushed PC from before call to interrupt
+  ADIW Z, 32; points to SP - 32, pushed PC from before call to interrupt
   LD R0, Z+; get low byte and increment
   LD R1, Z; get high byte
   PUSH R1; save the PC
