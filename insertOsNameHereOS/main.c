@@ -33,7 +33,8 @@ typedef struct
 
 // function prototypes
 void tickTimerSetup();
-extern void os(uint16_t* pointerToTaskArray);
+extern void os();
+extern void yeild();
 //      void function named taskF with void parameter
 void createTask(void (*taskF)(void));
 
@@ -90,5 +91,7 @@ void createTask(void (*taskF)(void)){
 
 
 void blinkyTaskFunction(){
-								PINB |= 1 << 5;
+								while (1) {
+																PINB |= 1 << 5;
+								}
 }
