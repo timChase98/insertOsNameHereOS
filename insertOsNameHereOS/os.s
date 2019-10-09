@@ -9,8 +9,8 @@
   .equ STARTOFTASKLIST_L, 0x00; task list memory start at 0x0100
   .equ STARTOFTASKLIST_H, 0x01
 
-  .equ STARTOFTASKSTATE_L 0x00; saved processor states start at 0x0200
-  .equ STARTOFTASKSTATE_H 0x20
+  .equ STARTOFTASKSTATE_L, 0x00; saved processor states start at 0x0200
+  .equ STARTOFTASKSTATE_H, 0x02
 
   ; OS global variables start at 0x0400
   ; Current Task @ 0x0400
@@ -53,13 +53,13 @@ TIMER4_COMPA_vect:
   ; save the state of the processor into the saved state RAM
     LDI R16, 32
     MUL R17, R16; multiply task counter by 32 and put result in R0, R1
-    LDI ZL, STARTOFSAVEDSTATE_L
-    LDI ZH, STARTOFSAVEDSTATE_H
+    LDI ZL, STARTOFTASKSTATE_L
+    LDI ZH, STARTOFTASKSTATE_H
     ADD ZL, R0; 16bit add
     ADC ZH, R1
 
     POP R0; saved R0 from jmp
-    ST Z+ R0
+    ST Z+, R0
     POP R0; saved SREG from JMP
     ST Z+, R0
     ST Z+, R2
@@ -110,22 +110,21 @@ TIMER4_COMPA_vect:
   ; calculate address of current task structure
     LDI R16, 16
     MUL R17, R16; multiply task counter by 16 and put the result in R0
-    LDI ZL, STARTOFTASKLIST_L + 10; stack pointer address in task list
+    LDI ZL, STARTOFTASKLIST_L + 8; stack pointer address in task list
     LDI ZH, STARTOFTASKLIST_H
     ; task counter to offset
     ADD ZL, R0;
-    CLR R0;
-    ADC ZH, R0; does a 16bit add correct address now in Z register
+    ADC ZH, R1; does a 16bit add correct address now in Z register
 
   ; save stack pointer and program counter to task structure memeory
     POP R0; low byte of SP
+	POP R1; high byte of SP 
     ST Z+, R0
-    POP R0 ; high byte of SP
-    ST Z+, R0
+    ST Z+, R1
     POP R0 ; low byte of PC
+    POP R1 ; high byte of PC
     ST Z+, R0
-    POP R0 ; high byte of PC
-    ST Z+, R0
+    ST Z+, R1
 
   INC R17; increment task counter
   CP R17, R18
@@ -136,16 +135,16 @@ TIMER4_COMPA_vect:
   LDI ZH, TASKCOUNTERADDR_H
   ST Z, R17
 
+  LOADSTATE:
   ; Load saved state
     ; get saved PC and SP
       LDI R16, 16
       MUL R17, R16; multiply task counter by 16 and put the result in R0
-      LDI ZL, STARTOFTASKLIST_L + 12; program counter address in task list
+      LDI ZL, STARTOFTASKLIST_L + 10; program counter address in task list
       LDI ZH, STARTOFTASKLIST_H
       ; task counter to offset
       ADD ZL, R0;
-      CLR R0;
-      ADC ZH, R0; does a 16bit add correct address now in Z register
+      ADC ZH, R1; does a 16bit add correct address now in Z register
       LD R0, Z+; PCL
       PUSH R0
       LD R0, Z; PCH
@@ -154,61 +153,61 @@ TIMER4_COMPA_vect:
       ; subtract 4 to get the stack pointer
       SBIW Z, 4
       LD R0, Z+; SPL
-      PUSH R0
+      ;PUSH R0
       LD R0, Z; SPH
-      PUSH R0
+      ;PUSH R0
 
     ; calculate start of saved state for current task
       LDI R16, 32
       MUL R17, R16; multiply task counter by 32 and put result in R0, R1
-      LDI ZL, STARTOFSAVEDSTATE_L
-      LDI ZH, STARTOFSAVEDSTATE_H
+      LDI ZL, STARTOFTASKSTATE_L
+      LDI ZH, STARTOFTASKSTATE_H
       ADD ZL, R0; 16bit add
       ADC ZH, R1
 
     ; restore register
-      LD RO, Z+
+      LD R0, Z+
       LD R1, Z+; saved status register
       OUT _SFR_IO_ADDR(SREG), R1
-      LD, R2, Z+
-      LD, R3, Z+
-      LD, R4, Z+
-      LD, R5, Z+
-      LD, R6, Z+
-      LD, R7, Z+
-      LD, R8, Z+
-      LD, R9, Z+
-      LD, R10, Z+
-      LD, R11, Z+
-      LD, R12, Z+
-      LD, R13, Z+
-      LD, R14, Z+
-      LD, R15, Z+
-      LD, R16, Z+
-      LD, R17, Z+
-      LD, R18, Z+
-      LD, R19, Z+
-      LD, R20, Z+
-      LD, R21, Z+
-      LD, R22, Z+
-      LD, R23, Z+
-      LD, R24, Z+
-      LD, R25, Z+
-      LD, R26, Z+
-      LD, R27, Z+
-      LD, R28, Z+
-      LD, R29, Z+
+      LD R2, Z+
+      LD R3, Z+
+      LD R4, Z+
+      LD R5, Z+
+      LD R6, Z+
+      LD R7, Z+
+      LD R8, Z+
+      LD R9, Z+
+      LD R10, Z+
+      LD R11, Z+
+      LD R12, Z+
+      LD R13, Z+
+      LD R14, Z+
+      LD R15, Z+
+      LD R16, Z+
+      LD R17, Z+
+      LD R18, Z+
+      LD R19, Z+
+      LD R20, Z+
+      LD R21, Z+
+      LD R22, Z+
+      LD R23, Z+
+      LD R24, Z+
+      LD R25, Z+
+      LD R26, Z+
+      LD R27, Z+
+      LD R28, Z+
+      LD R29, Z+
+
       LD R1, Z+ ; ZL
-      PUSH R1;
-      LD ZH, Z,; ZH
+      LD ZH, Z; ZH
       MOV ZL, R1
 
     ; restore stack pointer 
-      POP R1; SPH
-      OUT _SFR_IO_ADDR(SPH), R1
-      POP R1; SPL
-      OUT _SFR_IO_ADDR(SPL), R1
-      CLR R1
+;      POP R1; SPH
+;      OUT _SFR_IO_ADDR(SPH), R1
+;      POP R1; SPL
+;      OUT _SFR_IO_ADDR(SPL), R1
+     CLR R1
 
     ; PC shoudld be on stack
 

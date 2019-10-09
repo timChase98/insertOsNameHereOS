@@ -16,7 +16,7 @@
 #endif
 
 
-typedef enum {READY, RUNNING, WAITING, DONE} taskState;
+typedef enum __attribute__ ((__packed__)) {READY, RUNNING, WAITING, DONE} taskState;
 
 typedef struct
 {
@@ -24,10 +24,11 @@ typedef struct
 								uint16_t taskID;
 								void (*taskFunction)(Task);
 								void (*placeHolder)(void);
-								taskState state;
+								uint16_t state;
 								uint16_t* stackPointer;
-								uint16_t programCounter;
-								void* data;
+								void (*programCounter)(Task);// stored as function so it mem aligns correctly 
+								uint16_t placeHolder2; 
+								uint16_t placeHolder3; 
 
 } Task;
 
@@ -39,9 +40,10 @@ extern void yeild();
 void createTask(void (*taskF)(void));
 
 void blinkyTaskFunction();
+void blinkyTask2Function();
 
 
-Task taskArray[16] __attribute__((address (0x100)));// at start of RAM
+volatile Task taskArray[16] __attribute__((address (0x100)));// at start of RAM
 uint8_t taskCounter __attribute__((address (0x400))); // at start of OS VAR space
 uint8_t numberOfTasks __attribute__((address (0x401)));
 
@@ -57,9 +59,14 @@ int main(void)
 								i = 0;
 
 								tickTimerSetup();
-								sei();
+								
 
 								createTask(blinkyTaskFunction);
+								createTask(blinkyTask2Function);
+								
+								sei();
+								
+								taskArray[0].taskFunction();
 
 								/* Replace with your application code */
 								while (1)
@@ -80,9 +87,12 @@ void createTask(void (*taskF)(void)){
 								Task t = taskArray[numberOfTasks]; // get memory for task
 								t.taskID = numberOfTasks; // tasks start at 1
 								t.taskFunction = taskF;
-								//t.isTaskReady = taskReady;
+								t.placeHolder = 0xAABB; 
+								t.placeHolder2 = 0xCCDD; 
+								t.placeHolder3 = 0xEEFF; 
 								t.state = WAITING;
 								t.programCounter = taskF;
+								t.stackPointer = 0x0505; 
 
 								taskArray[numberOfTasks] = t;
 
@@ -92,6 +102,11 @@ void createTask(void (*taskF)(void)){
 
 void blinkyTaskFunction(){
 								while (1) {
-																PINB |= 1 << 5;
+																PORTB |= 1 << 5;
+								}
+}
+void blinkyTask2Function(){
+								while (1) {
+																PORTB &= ~(1 << 5);
 								}
 }
