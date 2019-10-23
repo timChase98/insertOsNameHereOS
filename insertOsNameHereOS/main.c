@@ -34,10 +34,12 @@ typedef struct
 
 // function prototypes
 void tickTimerSetup();
+void clrRam();
 extern void os();
 extern void yeild();
 //      void function named taskF with void parameter
 void createTask(void (*taskF)(void));
+
 
 void blinkyTaskFunction();
 void blinkyTask2Function();
@@ -51,6 +53,7 @@ volatile uint8_t i __attribute__((address (0x402)));
 
 int main(void)
 {
+								clrRam();
 								taskCounter = 0;
 								numberOfTasks = 0;
 								DDRE |= 1 << 0; // heartbeat pin
@@ -58,12 +61,12 @@ int main(void)
 
 								i = 0;
 
-								tickTimerSetup();
 								
 
 								createTask(blinkyTaskFunction);
 								createTask(blinkyTask2Function);
-								
+
+								tickTimerSetup();								
 								sei();
 								
 								taskArray[0].taskFunction();
@@ -75,12 +78,19 @@ int main(void)
 								}
 }
 
+void clrRam(){
+	for(uint16_t* i = 0x100; i < 0x700; i++){
+		*i = 0xAABB;
+	}
+}
+
 void tickTimerSetup(){
 								TCCR4A = 0;
 								// ctc mode		// clk / 8
 								TCCR4B = (1 << WGM42) | (0b010 << CS40);
 								OCR4A = TIMER_TICK_TIME_LOAD_VALUE;
 								TIMSK4 = 1 << OCIE4A;
+								TCNT4 = 0;
 }
 
 void createTask(void (*taskF)(void)){
@@ -92,7 +102,15 @@ void createTask(void (*taskF)(void)){
 								t.placeHolder3 = 0xEEFF; 
 								t.state = WAITING;
 								t.programCounter = taskF;
-								t.stackPointer = 0x0505; 
+								t.stackPointer = 0x043F + 64 * numberOfTasks - 34; 
+								
+								// sketchy hard coded pointer stuff 
+								uint16_t defNotAPtrtoTaskF = taskF; // compilers suck 
+								uint8_t* ptrToStackIntial = 0x043F + 64 * numberOfTasks -1;
+								*ptrToStackIntial = defNotAPtrtoTaskF >> 8;
+								ptrToStackIntial += 1; 
+								*ptrToStackIntial = defNotAPtrtoTaskF & 0xFF;
+								
 
 								taskArray[numberOfTasks] = t;
 

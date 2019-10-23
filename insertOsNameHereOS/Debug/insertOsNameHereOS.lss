@@ -3,29 +3,29 @@ insertOsNameHereOS.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000338  2**0
+  0 .data         00000000  00800100  00800100  00000348  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000002e4  00000000  00000000  00000054  2**1
+  1 .text         000002f4  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  00000338  2**0
+  2 .comment      00000030  00000000  00000000  00000348  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000368  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000378  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000060  00000000  00000000  000003a8  2**3
+  4 .debug_aranges 00000068  00000000  00000000  000003b8  2**3
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000bc6  00000000  00000000  00000408  2**0
+  5 .debug_info   00000c28  00000000  00000000  00000420  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000009fb  00000000  00000000  00000fce  2**0
+  6 .debug_abbrev 00000a20  00000000  00000000  00001048  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   0000067b  00000000  00000000  000019c9  2**0
+  7 .debug_line   00000630  00000000  00000000  00001a68  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000074  00000000  00000000  00002044  2**2
+  8 .debug_frame  00000084  00000000  00000000  00002098  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000532  00000000  00000000  000020b8  2**0
+  9 .debug_str    0000055c  00000000  00000000  0000211c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000012d  00000000  00000000  000025ea  2**0
+ 10 .debug_loc    00000206  00000000  00000000  00002678  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000030  00000000  00000000  00002717  2**0
+ 11 .debug_ranges 00000038  00000000  00000000  0000287e  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -84,14 +84,14 @@ Disassembly of section .text:
   ba:	d8 e0       	ldi	r29, 0x08	; 8
   bc:	de bf       	out	0x3e, r29	; 62
   be:	cd bf       	out	0x3d, r28	; 61
-  c0:	0e 94 52 01 	call	0x2a4	; 0x2a4 <main>
-  c4:	0c 94 70 01 	jmp	0x2e0	; 0x2e0 <_exit>
+  c0:	0e 94 58 01 	call	0x2b0	; 0x2b0 <main>
+  c4:	0c 94 78 01 	jmp	0x2f0	; 0x2f0 <_exit>
 
 000000c8 <__bad_interrupt>:
   c8:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 000000cc <os>:
-
+ .global LoadSTATE
 
  .global os
 os:
@@ -113,506 +113,491 @@ yeild:
 .global TIMER4_COMPA_vect
 
 TIMER4_COMPA_vect:
-  ; save the status of registers modified by the OS
-    PUSH ZH
-  d4:	ff 93       	push	r31
-    PUSH ZL
-  d6:	ef 93       	push	r30
-    PUSH R18
-  d8:	2f 93       	push	r18
-    PUSH R17
-  da:	1f 93       	push	r17
-    PUSH R16
-  dc:	0f 93       	push	r16
-    ; R1 is zero and doenst need to be saved
-    IN R1, _SFR_IO_ADDR(SREG); save the status register
-  de:	1f b6       	in	r1, 0x3f	; 63
-    PUSH R1
-  e0:	1f 92       	push	r1
-    PUSH R0;
-  e2:	0f 92       	push	r0
+  ; save the registers
+	IN R1, _SFR_IO_ADDR(SREG); R1 is zero and doesnt need to be saved 
+  d4:	1f b6       	in	r1, 0x3f	; 63
+	PUSH R31
+  d6:	ff 93       	push	r31
+	PUSH R30
+  d8:	ef 93       	push	r30
+	PUSH R29
+  da:	df 93       	push	r29
+	PUSH R28
+  dc:	cf 93       	push	r28
+	PUSH R27
+  de:	bf 93       	push	r27
+	PUSH R26
+  e0:	af 93       	push	r26
+	PUSH R25
+  e2:	9f 93       	push	r25
+	PUSH R24
+  e4:	8f 93       	push	r24
+	PUSH R23
+  e6:	7f 93       	push	r23
+	PUSH R22
+  e8:	6f 93       	push	r22
+	PUSH R21
+  ea:	5f 93       	push	r21
+	PUSH R20
+  ec:	4f 93       	push	r20
+	PUSH R19
+  ee:	3f 93       	push	r19
+	PUSH R18
+  f0:	2f 93       	push	r18
+	PUSH R17
+  f2:	1f 93       	push	r17
+	PUSH R16
+  f4:	0f 93       	push	r16
+	PUSH R15
+  f6:	ff 92       	push	r15
+	PUSH R14
+  f8:	ef 92       	push	r14
+	PUSH R13
+  fa:	df 92       	push	r13
+	PUSH R12
+  fc:	cf 92       	push	r12
+	PUSH R11
+  fe:	bf 92       	push	r11
+	PUSH R10
+ 100:	af 92       	push	r10
+	PUSH R9
+ 102:	9f 92       	push	r9
+	PUSH R8
+ 104:	8f 92       	push	r8
+	PUSH R7
+ 106:	7f 92       	push	r7
+	PUSH R6
+ 108:	6f 92       	push	r6
+	PUSH R5
+ 10a:	5f 92       	push	r5
+	PUSH R4
+ 10c:	4f 92       	push	r4
+	PUSH R3
+ 10e:	3f 92       	push	r3
+	PUSH R2
+ 110:	2f 92       	push	r2
+	PUSH R1
+ 112:	1f 92       	push	r1
+	PUSH R0
+ 114:	0f 92       	push	r0
 
   ; get the Task Counter into R17 and number of tasks into R18
     LDI ZL, TASKCOUNTERADDR_L; load the address of the task counter into the pointer register
-  e4:	e0 e0       	ldi	r30, 0x00	; 0
+ 116:	e0 e0       	ldi	r30, 0x00	; 0
     LDI ZH, TASKCOUNTERADDR_H
-  e6:	f4 e0       	ldi	r31, 0x04	; 4
+ 118:	f4 e0       	ldi	r31, 0x04	; 4
     LD R17, Z+; get task counter
-  e8:	11 91       	ld	r17, Z+
+ 11a:	11 91       	ld	r17, Z+
     LD R18, Z; get number of tasks
-  ea:	20 81       	ld	r18, Z
+ 11c:	20 81       	ld	r18, Z
 
-  ; save the state of the processor into the saved state RAM
-    LDI R16, 32
-  ec:	00 e2       	ldi	r16, 0x20	; 32
-    MUL R17, R16; multiply task counter by 32 and put result in R0, R1
-  ee:	10 9f       	mul	r17, r16
-    LDI ZL, STARTOFTASKSTATE_L
-  f0:	e0 e0       	ldi	r30, 0x00	; 0
-    LDI ZH, STARTOFTASKSTATE_H
-  f2:	f2 e0       	ldi	r31, 0x02	; 2
-    ADD ZL, R0; 16bit add
-  f4:	e0 0d       	add	r30, r0
-    ADC ZH, R1
-  f6:	f1 1d       	adc	r31, r1
-
-    POP R0; saved R0 from jmp
-  f8:	0f 90       	pop	r0
-    ST Z+, R0
-  fa:	01 92       	st	Z+, r0
-    POP R0; saved SREG from JMP
-  fc:	0f 90       	pop	r0
-    ST Z+, R0
-  fe:	01 92       	st	Z+, r0
-    ST Z+, R2
- 100:	21 92       	st	Z+, r2
-    ST Z+, R3
- 102:	31 92       	st	Z+, r3
-    ST Z+, R4
- 104:	41 92       	st	Z+, r4
-    ST Z+, R5
- 106:	51 92       	st	Z+, r5
-    ST Z+, R6
- 108:	61 92       	st	Z+, r6
-    ST Z+, R7
- 10a:	71 92       	st	Z+, r7
-    ST Z+, R8
- 10c:	81 92       	st	Z+, r8
-    ST Z+, R9
- 10e:	91 92       	st	Z+, r9
-    ST Z+, R10
- 110:	a1 92       	st	Z+, r10
-    ST Z+, R11
- 112:	b1 92       	st	Z+, r11
-    ST Z+, R12
- 114:	c1 92       	st	Z+, r12
-    ST Z+, R13
- 116:	d1 92       	st	Z+, r13
-    ST Z+, R14
- 118:	e1 92       	st	Z+, r14
-    ST Z+, R15
- 11a:	f1 92       	st	Z+, r15
-
-    POP R0; saved R16
- 11c:	0f 90       	pop	r0
-    ST Z+, R0
- 11e:	01 92       	st	Z+, r0
-    POP R0; saved R17
- 120:	0f 90       	pop	r0
-    ST Z+, R0
- 122:	01 92       	st	Z+, r0
-    POP R0; saved R18
- 124:	0f 90       	pop	r0
-    ST Z+, R0
- 126:	01 92       	st	Z+, r0
-
-    ST Z+, R19
- 128:	31 93       	st	Z+, r19
-    ST Z+, R20
- 12a:	41 93       	st	Z+, r20
-    ST Z+, R21
- 12c:	51 93       	st	Z+, r21
-    ST Z+, R22
- 12e:	61 93       	st	Z+, r22
-    ST Z+, R23
- 130:	71 93       	st	Z+, r23
-    ST Z+, R24
- 132:	81 93       	st	Z+, r24
-    ST Z+, R25
- 134:	91 93       	st	Z+, r25
-    ST Z+, R26
- 136:	a1 93       	st	Z+, r26
-    ST Z+, R27
- 138:	b1 93       	st	Z+, r27
-
-    POP R0; saved ZL
- 13a:	0f 90       	pop	r0
-    ST Z+, R0
- 13c:	01 92       	st	Z+, r0
-    POP R0; saved ZH
- 13e:	0f 90       	pop	r0
-    ST Z+, R0
- 140:	01 92       	st	Z+, r0
-
-  ; get the stack pointer and program counter
-    ; program counter is on the stack from jump to interrupt
+  ; get the stack pointer
     IN ZL, _SFR_IO_ADDR(SPL); copy the stack pointer to the Z register
- 142:	ed b7       	in	r30, 0x3d	; 61
+ 11e:	ed b7       	in	r30, 0x3d	; 61
     IN ZH, _SFR_IO_ADDR(SPH);
- 144:	fe b7       	in	r31, 0x3e	; 62
+ 120:	fe b7       	in	r31, 0x3e	; 62
     PUSH ZH; save the stack pointer
- 146:	ff 93       	push	r31
+ 122:	ff 93       	push	r31
     PUSH ZL
- 148:	ef 93       	push	r30
+ 124:	ef 93       	push	r30
 
 
   ; calculate address of current task structure
     LDI R16, 16
- 14a:	00 e1       	ldi	r16, 0x10	; 16
+ 126:	00 e1       	ldi	r16, 0x10	; 16
     MUL R17, R16; multiply task counter by 16 and put the result in R0
- 14c:	10 9f       	mul	r17, r16
+ 128:	10 9f       	mul	r17, r16
     LDI ZL, STARTOFTASKLIST_L + 8; stack pointer address in task list
- 14e:	e8 e0       	ldi	r30, 0x08	; 8
+ 12a:	e8 e0       	ldi	r30, 0x08	; 8
     LDI ZH, STARTOFTASKLIST_H
- 150:	f1 e0       	ldi	r31, 0x01	; 1
+ 12c:	f1 e0       	ldi	r31, 0x01	; 1
     ; task counter to offset
     ADD ZL, R0;
- 152:	e0 0d       	add	r30, r0
+ 12e:	e0 0d       	add	r30, r0
     ADC ZH, R1; does a 16bit add correct address now in Z register
- 154:	f1 1d       	adc	r31, r1
+ 130:	f1 1d       	adc	r31, r1
 
   ; save stack pointer and program counter to task structure memeory
     POP R0; low byte of SP
- 156:	0f 90       	pop	r0
+ 132:	0f 90       	pop	r0
 	POP R1; high byte of SP 
- 158:	1f 90       	pop	r1
+ 134:	1f 90       	pop	r1
     ST Z+, R0
- 15a:	01 92       	st	Z+, r0
+ 136:	01 92       	st	Z+, r0
     ST Z+, R1
- 15c:	11 92       	st	Z+, r1
-    POP R0 ; low byte of PC
- 15e:	0f 90       	pop	r0
-    POP R1 ; high byte of PC
- 160:	1f 90       	pop	r1
-    ST Z+, R0
- 162:	01 92       	st	Z+, r0
-    ST Z+, R1
- 164:	11 92       	st	Z+, r1
+ 138:	11 92       	st	Z+, r1
 
-  INC R17; increment task counter
- 166:	13 95       	inc	r17
+   INC R17; increment task counter
+ 13a:	13 95       	inc	r17
   CP R17, R18
- 168:	12 17       	cp	r17, r18
+ 13c:	12 17       	cp	r17, r18
   BRLO TaskNotOverflowed ; brach if lower
- 16a:	08 f0       	brcs	.+2      	; 0x16e <TaskNotOverflowed>
+ 13e:	08 f0       	brcs	.+2      	; 0x142 <TaskNotOverflowed>
   CLR R17; if taskCounter >= numberOfTasks reset to task 0
- 16c:	11 27       	eor	r17, r17
+ 140:	11 27       	eor	r17, r17
 
-0000016e <TaskNotOverflowed>:
+00000142 <TaskNotOverflowed>:
   TaskNotOverflowed:
   LDI ZL, TASKCOUNTERADDR_L
- 16e:	e0 e0       	ldi	r30, 0x00	; 0
+ 142:	e0 e0       	ldi	r30, 0x00	; 0
   LDI ZH, TASKCOUNTERADDR_H
- 170:	f4 e0       	ldi	r31, 0x04	; 4
+ 144:	f4 e0       	ldi	r31, 0x04	; 4
   ST Z, R17
- 172:	10 83       	st	Z, r17
+ 146:	10 83       	st	Z, r17
 
-00000174 <LOADSTATE>:
+00000148 <LOADSTATE>:
 
   LOADSTATE:
   ; Load saved state
-    ; get saved PC and SP
+    ; get saved SP
       LDI R16, 16
- 174:	00 e1       	ldi	r16, 0x10	; 16
+ 148:	00 e1       	ldi	r16, 0x10	; 16
       MUL R17, R16; multiply task counter by 16 and put the result in R0
- 176:	10 9f       	mul	r17, r16
-      LDI ZL, STARTOFTASKLIST_L + 10; program counter address in task list
- 178:	ea e0       	ldi	r30, 0x0A	; 10
+ 14a:	10 9f       	mul	r17, r16
+      LDI ZL, STARTOFTASKLIST_L + 8; program counter address in task list
+ 14c:	e8 e0       	ldi	r30, 0x08	; 8
       LDI ZH, STARTOFTASKLIST_H
- 17a:	f1 e0       	ldi	r31, 0x01	; 1
+ 14e:	f1 e0       	ldi	r31, 0x01	; 1
       ; task counter to offset
       ADD ZL, R0;
- 17c:	e0 0d       	add	r30, r0
+ 150:	e0 0d       	add	r30, r0
       ADC ZH, R1; does a 16bit add correct address now in Z register
- 17e:	f1 1d       	adc	r31, r1
-      LD R0, Z+; PCL
- 180:	01 90       	ld	r0, Z+
-      PUSH R0
- 182:	0f 92       	push	r0
-      LD R0, Z; PCH
- 184:	00 80       	ld	r0, Z
-      PUSH R0
- 186:	0f 92       	push	r0
-
-      ; subtract 4 to get the stack pointer
-      SBIW Z, 4
- 188:	34 97       	sbiw	r30, 0x04	; 4
+ 152:	f1 1d       	adc	r31, r1
       LD R0, Z+; SPL
- 18a:	01 90       	ld	r0, Z+
-      ;PUSH R0
+ 154:	01 90       	ld	r0, Z+
+      PUSH R0
+ 156:	0f 92       	push	r0
       LD R0, Z; SPH
- 18c:	00 80       	ld	r0, Z
-      ;PUSH R0
+ 158:	00 80       	ld	r0, Z
+      PUSH R0
+ 15a:	0f 92       	push	r0
 
-    ; calculate start of saved state for current task
-      LDI R16, 32
- 18e:	00 e2       	ldi	r16, 0x20	; 32
-      MUL R17, R16; multiply task counter by 32 and put result in R0, R1
- 190:	10 9f       	mul	r17, r16
-      LDI ZL, STARTOFTASKSTATE_L
- 192:	e0 e0       	ldi	r30, 0x00	; 0
-      LDI ZH, STARTOFTASKSTATE_H
- 194:	f2 e0       	ldi	r31, 0x02	; 2
-      ADD ZL, R0; 16bit add
- 196:	e0 0d       	add	r30, r0
-      ADC ZH, R1
- 198:	f1 1d       	adc	r31, r1
 
-    ; restore register
-      LD R0, Z+
- 19a:	01 90       	ld	r0, Z+
-      LD R1, Z+; saved status register
- 19c:	11 90       	ld	r1, Z+
-      OUT _SFR_IO_ADDR(SREG), R1
- 19e:	1f be       	out	0x3f, r1	; 63
-      LD R2, Z+
- 1a0:	21 90       	ld	r2, Z+
-      LD R3, Z+
- 1a2:	31 90       	ld	r3, Z+
-      LD R4, Z+
- 1a4:	41 90       	ld	r4, Z+
-      LD R5, Z+
- 1a6:	51 90       	ld	r5, Z+
-      LD R6, Z+
- 1a8:	61 90       	ld	r6, Z+
-      LD R7, Z+
- 1aa:	71 90       	ld	r7, Z+
-      LD R8, Z+
- 1ac:	81 90       	ld	r8, Z+
-      LD R9, Z+
- 1ae:	91 90       	ld	r9, Z+
-      LD R10, Z+
- 1b0:	a1 90       	ld	r10, Z+
-      LD R11, Z+
- 1b2:	b1 90       	ld	r11, Z+
-      LD R12, Z+
- 1b4:	c1 90       	ld	r12, Z+
-      LD R13, Z+
- 1b6:	d1 90       	ld	r13, Z+
-      LD R14, Z+
- 1b8:	e1 90       	ld	r14, Z+
-      LD R15, Z+
- 1ba:	f1 90       	ld	r15, Z+
-      LD R16, Z+
- 1bc:	01 91       	ld	r16, Z+
-      LD R17, Z+
- 1be:	11 91       	ld	r17, Z+
-      LD R18, Z+
- 1c0:	21 91       	ld	r18, Z+
-      LD R19, Z+
- 1c2:	31 91       	ld	r19, Z+
-      LD R20, Z+
- 1c4:	41 91       	ld	r20, Z+
-      LD R21, Z+
- 1c6:	51 91       	ld	r21, Z+
-      LD R22, Z+
- 1c8:	61 91       	ld	r22, Z+
-      LD R23, Z+
- 1ca:	71 91       	ld	r23, Z+
-      LD R24, Z+
- 1cc:	81 91       	ld	r24, Z+
-      LD R25, Z+
- 1ce:	91 91       	ld	r25, Z+
-      LD R26, Z+
- 1d0:	a1 91       	ld	r26, Z+
-      LD R27, Z+
- 1d2:	b1 91       	ld	r27, Z+
-      LD R28, Z+
- 1d4:	c1 91       	ld	r28, Z+
-      LD R29, Z+
- 1d6:	d1 91       	ld	r29, Z+
-
-      LD R1, Z+ ; ZL
- 1d8:	11 90       	ld	r1, Z+
-      LD ZH, Z; ZH
- 1da:	f0 81       	ld	r31, Z
-      MOV ZL, R1
- 1dc:	e1 2d       	mov	r30, r1
     ; restore stack pointer 
-;      POP R1; SPH
-;      OUT _SFR_IO_ADDR(SPH), R1
-;      POP R1; SPL
-;      OUT _SFR_IO_ADDR(SPL), R1
-     CLR R1
- 1de:	11 24       	eor	r1, r1
+      POP R1; SPH
+ 15c:	1f 90       	pop	r1
+      POP R0; SPL
+ 15e:	0f 90       	pop	r0
+      OUT _SFR_IO_ADDR(SPH), R1
+ 160:	1e be       	out	0x3e, r1	; 62
+      OUT _SFR_IO_ADDR(SPL), R0
+ 162:	0d be       	out	0x3d, r0	; 61
+      
 
+	POP R0
+ 164:	0f 90       	pop	r0
+	POP R1
+ 166:	1f 90       	pop	r1
+	OUT _SFR_IO_ADDR(SREG), R1; put the Status register back 
+ 168:	1f be       	out	0x3f, r1	; 63
+	POP R2
+ 16a:	2f 90       	pop	r2
+	POP R3
+ 16c:	3f 90       	pop	r3
+	POP R4
+ 16e:	4f 90       	pop	r4
+	POP R5
+ 170:	5f 90       	pop	r5
+	POP R6
+ 172:	6f 90       	pop	r6
+	POP R7
+ 174:	7f 90       	pop	r7
+	POP R8
+ 176:	8f 90       	pop	r8
+	POP R9
+ 178:	9f 90       	pop	r9
+	POP R10
+ 17a:	af 90       	pop	r10
+	POP R11
+ 17c:	bf 90       	pop	r11
+	POP R12
+ 17e:	cf 90       	pop	r12
+	POP R13
+ 180:	df 90       	pop	r13
+	POP R14
+ 182:	ef 90       	pop	r14
+	POP R15
+ 184:	ff 90       	pop	r15
+	POP R16
+ 186:	0f 91       	pop	r16
+	POP R17
+ 188:	1f 91       	pop	r17
+	POP R18
+ 18a:	2f 91       	pop	r18
+	POP R19
+ 18c:	3f 91       	pop	r19
+	POP R20
+ 18e:	4f 91       	pop	r20
+	POP R21
+ 190:	5f 91       	pop	r21
+	POP R22
+ 192:	6f 91       	pop	r22
+	POP R23
+ 194:	7f 91       	pop	r23
+	POP R24
+ 196:	8f 91       	pop	r24
+	POP R25
+ 198:	9f 91       	pop	r25
+	POP R26
+ 19a:	af 91       	pop	r26
+	POP R27
+ 19c:	bf 91       	pop	r27
+	POP R28
+ 19e:	cf 91       	pop	r28
+	POP R29
+ 1a0:	df 91       	pop	r29
+	POP R30
+ 1a2:	ef 91       	pop	r30
+	POP R31
+ 1a4:	ff 91       	pop	r31
+	CLR R1
+ 1a6:	11 24       	eor	r1, r1
     ; PC shoudld be on stack
 
   reti
- 1e0:	18 95       	reti
+ 1a8:	18 95       	reti
 
-000001e2 <blinkyTaskFunction>:
+000001aa <blinkyTaskFunction>:
 }
 
 
 void blinkyTaskFunction(){
 								while (1) {
 																PORTB |= 1 << 5;
- 1e2:	2d 9a       	sbi	0x05, 5	; 5
- 1e4:	fe cf       	rjmp	.-4      	; 0x1e2 <blinkyTaskFunction>
+ 1aa:	2d 9a       	sbi	0x05, 5	; 5
+ 1ac:	fe cf       	rjmp	.-4      	; 0x1aa <blinkyTaskFunction>
 
-000001e6 <blinkyTask2Function>:
+000001ae <blinkyTask2Function>:
 								}
 }
 void blinkyTask2Function(){
 								while (1) {
 																PORTB &= ~(1 << 5);
- 1e6:	2d 98       	cbi	0x05, 5	; 5
- 1e8:	fe cf       	rjmp	.-4      	; 0x1e6 <blinkyTask2Function>
+ 1ae:	2d 98       	cbi	0x05, 5	; 5
+ 1b0:	fe cf       	rjmp	.-4      	; 0x1ae <blinkyTask2Function>
 
-000001ea <tickTimerSetup>:
+000001b2 <clrRam>:
 																i++;
 								}
 }
 
+void clrRam(){
+	for(uint16_t* i = 0x100; i < 0x700; i++){
+ 1b2:	e0 e0       	ldi	r30, 0x00	; 0
+ 1b4:	f1 e0       	ldi	r31, 0x01	; 1
+		*i = 0xAABB;
+ 1b6:	8b eb       	ldi	r24, 0xBB	; 187
+ 1b8:	9a ea       	ldi	r25, 0xAA	; 170
+ 1ba:	81 93       	st	Z+, r24
+ 1bc:	91 93       	st	Z+, r25
+																i++;
+								}
+}
+
+void clrRam(){
+	for(uint16_t* i = 0x100; i < 0x700; i++){
+ 1be:	e1 15       	cp	r30, r1
+ 1c0:	27 e0       	ldi	r18, 0x07	; 7
+ 1c2:	f2 07       	cpc	r31, r18
+ 1c4:	d1 f7       	brne	.-12     	; 0x1ba <clrRam+0x8>
+		*i = 0xAABB;
+	}
+}
+ 1c6:	08 95       	ret
+
+000001c8 <tickTimerSetup>:
+
 void tickTimerSetup(){
 								TCCR4A = 0;
- 1ea:	10 92 a0 00 	sts	0x00A0, r1	; 0x8000a0 <__TEXT_REGION_LENGTH__+0x7e00a0>
+ 1c8:	10 92 a0 00 	sts	0x00A0, r1	; 0x8000a0 <__TEXT_REGION_LENGTH__+0x7e00a0>
 								// ctc mode		// clk / 8
 								TCCR4B = (1 << WGM42) | (0b010 << CS40);
- 1ee:	8a e0       	ldi	r24, 0x0A	; 10
- 1f0:	80 93 a1 00 	sts	0x00A1, r24	; 0x8000a1 <__TEXT_REGION_LENGTH__+0x7e00a1>
+ 1cc:	8a e0       	ldi	r24, 0x0A	; 10
+ 1ce:	80 93 a1 00 	sts	0x00A1, r24	; 0x8000a1 <__TEXT_REGION_LENGTH__+0x7e00a1>
 								OCR4A = TIMER_TICK_TIME_LOAD_VALUE;
- 1f4:	80 ed       	ldi	r24, 0xD0	; 208
- 1f6:	97 e0       	ldi	r25, 0x07	; 7
- 1f8:	90 93 a9 00 	sts	0x00A9, r25	; 0x8000a9 <__TEXT_REGION_LENGTH__+0x7e00a9>
- 1fc:	80 93 a8 00 	sts	0x00A8, r24	; 0x8000a8 <__TEXT_REGION_LENGTH__+0x7e00a8>
+ 1d2:	80 ed       	ldi	r24, 0xD0	; 208
+ 1d4:	97 e0       	ldi	r25, 0x07	; 7
+ 1d6:	90 93 a9 00 	sts	0x00A9, r25	; 0x8000a9 <__TEXT_REGION_LENGTH__+0x7e00a9>
+ 1da:	80 93 a8 00 	sts	0x00A8, r24	; 0x8000a8 <__TEXT_REGION_LENGTH__+0x7e00a8>
 								TIMSK4 = 1 << OCIE4A;
- 200:	82 e0       	ldi	r24, 0x02	; 2
- 202:	80 93 72 00 	sts	0x0072, r24	; 0x800072 <__TEXT_REGION_LENGTH__+0x7e0072>
- 206:	08 95       	ret
+ 1de:	82 e0       	ldi	r24, 0x02	; 2
+ 1e0:	80 93 72 00 	sts	0x0072, r24	; 0x800072 <__TEXT_REGION_LENGTH__+0x7e0072>
+								TCNT4 = 0;
+ 1e4:	10 92 a5 00 	sts	0x00A5, r1	; 0x8000a5 <__TEXT_REGION_LENGTH__+0x7e00a5>
+ 1e8:	10 92 a4 00 	sts	0x00A4, r1	; 0x8000a4 <__TEXT_REGION_LENGTH__+0x7e00a4>
+ 1ec:	08 95       	ret
 
-00000208 <createTask>:
+000001ee <createTask>:
 }
 
 void createTask(void (*taskF)(void)){
- 208:	cf 93       	push	r28
- 20a:	df 93       	push	r29
- 20c:	cd b7       	in	r28, 0x3d	; 61
- 20e:	de b7       	in	r29, 0x3e	; 62
- 210:	60 97       	sbiw	r28, 0x10	; 16
- 212:	0f b6       	in	r0, 0x3f	; 63
- 214:	f8 94       	cli
- 216:	de bf       	out	0x3e, r29	; 62
- 218:	0f be       	out	0x3f, r0	; 63
- 21a:	cd bf       	out	0x3d, r28	; 61
- 21c:	ac 01       	movw	r20, r24
+ 1ee:	cf 93       	push	r28
+ 1f0:	df 93       	push	r29
+ 1f2:	cd b7       	in	r28, 0x3d	; 61
+ 1f4:	de b7       	in	r29, 0x3e	; 62
+ 1f6:	60 97       	sbiw	r28, 0x10	; 16
+ 1f8:	0f b6       	in	r0, 0x3f	; 63
+ 1fa:	f8 94       	cli
+ 1fc:	de bf       	out	0x3e, r29	; 62
+ 1fe:	0f be       	out	0x3f, r0	; 63
+ 200:	cd bf       	out	0x3d, r28	; 61
 								Task t = taskArray[numberOfTasks]; // get memory for task
- 21e:	90 91 01 04 	lds	r25, 0x0401	; 0x800401 <_end+0x301>
- 222:	69 2f       	mov	r22, r25
- 224:	70 e0       	ldi	r23, 0x00	; 0
- 226:	9b 01       	movw	r18, r22
- 228:	22 95       	swap	r18
- 22a:	32 95       	swap	r19
- 22c:	30 7f       	andi	r19, 0xF0	; 240
- 22e:	32 27       	eor	r19, r18
- 230:	20 7f       	andi	r18, 0xF0	; 240
- 232:	32 27       	eor	r19, r18
- 234:	20 50       	subi	r18, 0x00	; 0
- 236:	3f 4f       	sbci	r19, 0xFF	; 255
- 238:	80 e1       	ldi	r24, 0x10	; 16
- 23a:	f9 01       	movw	r30, r18
- 23c:	de 01       	movw	r26, r28
- 23e:	11 96       	adiw	r26, 0x01	; 1
- 240:	01 90       	ld	r0, Z+
- 242:	0d 92       	st	X+, r0
- 244:	8a 95       	dec	r24
- 246:	e1 f7       	brne	.-8      	; 0x240 <createTask+0x38>
+ 202:	20 91 01 04 	lds	r18, 0x0401	; 0x800401 <_end+0x301>
+ 206:	30 e0       	ldi	r19, 0x00	; 0
+ 208:	f9 01       	movw	r30, r18
+ 20a:	e2 95       	swap	r30
+ 20c:	f2 95       	swap	r31
+ 20e:	f0 7f       	andi	r31, 0xF0	; 240
+ 210:	fe 27       	eor	r31, r30
+ 212:	e0 7f       	andi	r30, 0xF0	; 240
+ 214:	fe 27       	eor	r31, r30
+ 216:	e0 50       	subi	r30, 0x00	; 0
+ 218:	ff 4f       	sbci	r31, 0xFF	; 255
+ 21a:	40 e1       	ldi	r20, 0x10	; 16
+ 21c:	de 01       	movw	r26, r28
+ 21e:	11 96       	adiw	r26, 0x01	; 1
+ 220:	01 90       	ld	r0, Z+
+ 222:	0d 92       	st	X+, r0
+ 224:	4a 95       	dec	r20
+ 226:	e1 f7       	brne	.-8      	; 0x220 <createTask+0x32>
+								t.placeHolder = 0xAABB; 
+								t.placeHolder2 = 0xCCDD; 
 								t.placeHolder3 = 0xEEFF; 
 								t.state = WAITING;
 								t.programCounter = taskF;
-								t.stackPointer = 0x0505; 
+								t.stackPointer = 0x043F + 64 * numberOfTasks - 34; 
+ 228:	b9 01       	movw	r22, r18
+ 22a:	00 24       	eor	r0, r0
+ 22c:	76 95       	lsr	r23
+ 22e:	67 95       	ror	r22
+ 230:	07 94       	ror	r0
+ 232:	76 95       	lsr	r23
+ 234:	67 95       	ror	r22
+ 236:	07 94       	ror	r0
+ 238:	76 2f       	mov	r23, r22
+ 23a:	60 2d       	mov	r22, r0
+								
+								// sketchy hard coded pointer stuff 
+								uint16_t defNotAPtrtoTaskF = taskF; // compilers suck 
+								uint8_t* ptrToStackIntial = 0x043F + 64 * numberOfTasks -1;
+ 23c:	fb 01       	movw	r30, r22
+ 23e:	e2 5c       	subi	r30, 0xC2	; 194
+ 240:	fb 4f       	sbci	r31, 0xFB	; 251
+								*ptrToStackIntial = defNotAPtrtoTaskF >> 8;
+ 242:	90 83       	st	Z, r25
+								ptrToStackIntial += 1; 
+								*ptrToStackIntial = defNotAPtrtoTaskF & 0xFF;
+ 244:	81 83       	std	Z+1, r24	; 0x01
+								
 
 								taskArray[numberOfTasks] = t;
- 248:	7a 83       	std	Y+2, r23	; 0x02
- 24a:	69 83       	std	Y+1, r22	; 0x01
- 24c:	5c 83       	std	Y+4, r21	; 0x04
- 24e:	4b 83       	std	Y+3, r20	; 0x03
- 250:	6b eb       	ldi	r22, 0xBB	; 187
- 252:	7a ea       	ldi	r23, 0xAA	; 170
- 254:	7e 83       	std	Y+6, r23	; 0x06
- 256:	6d 83       	std	Y+5, r22	; 0x05
- 258:	62 e0       	ldi	r22, 0x02	; 2
- 25a:	70 e0       	ldi	r23, 0x00	; 0
- 25c:	78 87       	std	Y+8, r23	; 0x08
- 25e:	6f 83       	std	Y+7, r22	; 0x07
- 260:	65 e0       	ldi	r22, 0x05	; 5
- 262:	75 e0       	ldi	r23, 0x05	; 5
- 264:	7a 87       	std	Y+10, r23	; 0x0a
- 266:	69 87       	std	Y+9, r22	; 0x09
- 268:	5c 87       	std	Y+12, r21	; 0x0c
- 26a:	4b 87       	std	Y+11, r20	; 0x0b
- 26c:	4d ed       	ldi	r20, 0xDD	; 221
- 26e:	5c ec       	ldi	r21, 0xCC	; 204
- 270:	5e 87       	std	Y+14, r21	; 0x0e
- 272:	4d 87       	std	Y+13, r20	; 0x0d
- 274:	4f ef       	ldi	r20, 0xFF	; 255
- 276:	5e ee       	ldi	r21, 0xEE	; 238
- 278:	58 8b       	std	Y+16, r21	; 0x10
- 27a:	4f 87       	std	Y+15, r20	; 0x0f
- 27c:	80 e1       	ldi	r24, 0x10	; 16
- 27e:	fe 01       	movw	r30, r28
- 280:	31 96       	adiw	r30, 0x01	; 1
- 282:	d9 01       	movw	r26, r18
- 284:	01 90       	ld	r0, Z+
- 286:	0d 92       	st	X+, r0
- 288:	8a 95       	dec	r24
- 28a:	e1 f7       	brne	.-8      	; 0x284 <createTask+0x7c>
+ 246:	40 91 01 04 	lds	r20, 0x0401	; 0x800401 <_end+0x301>
+ 24a:	3a 83       	std	Y+2, r19	; 0x02
+ 24c:	29 83       	std	Y+1, r18	; 0x01
+ 24e:	8b 83       	std	Y+3, r24	; 0x03
+ 250:	9c 83       	std	Y+4, r25	; 0x04
+ 252:	2b eb       	ldi	r18, 0xBB	; 187
+ 254:	3a ea       	ldi	r19, 0xAA	; 170
+ 256:	3e 83       	std	Y+6, r19	; 0x06
+ 258:	2d 83       	std	Y+5, r18	; 0x05
+ 25a:	22 e0       	ldi	r18, 0x02	; 2
+ 25c:	30 e0       	ldi	r19, 0x00	; 0
+ 25e:	38 87       	std	Y+8, r19	; 0x08
+ 260:	2f 83       	std	Y+7, r18	; 0x07
+ 262:	63 5e       	subi	r22, 0xE3	; 227
+ 264:	7b 4f       	sbci	r23, 0xFB	; 251
+ 266:	7a 87       	std	Y+10, r23	; 0x0a
+ 268:	69 87       	std	Y+9, r22	; 0x09
+ 26a:	8b 87       	std	Y+11, r24	; 0x0b
+ 26c:	9c 87       	std	Y+12, r25	; 0x0c
+ 26e:	8d ed       	ldi	r24, 0xDD	; 221
+ 270:	9c ec       	ldi	r25, 0xCC	; 204
+ 272:	9e 87       	std	Y+14, r25	; 0x0e
+ 274:	8d 87       	std	Y+13, r24	; 0x0d
+ 276:	8f ef       	ldi	r24, 0xFF	; 255
+ 278:	9e ee       	ldi	r25, 0xEE	; 238
+ 27a:	98 8b       	std	Y+16, r25	; 0x10
+ 27c:	8f 87       	std	Y+15, r24	; 0x0f
+ 27e:	80 e1       	ldi	r24, 0x10	; 16
+ 280:	48 9f       	mul	r20, r24
+ 282:	d0 01       	movw	r26, r0
+ 284:	11 24       	eor	r1, r1
+ 286:	a0 50       	subi	r26, 0x00	; 0
+ 288:	bf 4f       	sbci	r27, 0xFF	; 255
+ 28a:	80 e1       	ldi	r24, 0x10	; 16
+ 28c:	fe 01       	movw	r30, r28
+ 28e:	31 96       	adiw	r30, 0x01	; 1
+ 290:	01 90       	ld	r0, Z+
+ 292:	0d 92       	st	X+, r0
+ 294:	8a 95       	dec	r24
+ 296:	e1 f7       	brne	.-8      	; 0x290 <createTask+0xa2>
 
 								numberOfTasks++;// increment total number of tasks
- 28c:	9f 5f       	subi	r25, 0xFF	; 255
- 28e:	90 93 01 04 	sts	0x0401, r25	; 0x800401 <_end+0x301>
+ 298:	4f 5f       	subi	r20, 0xFF	; 255
+ 29a:	40 93 01 04 	sts	0x0401, r20	; 0x800401 <_end+0x301>
 }
- 292:	60 96       	adiw	r28, 0x10	; 16
- 294:	0f b6       	in	r0, 0x3f	; 63
- 296:	f8 94       	cli
- 298:	de bf       	out	0x3e, r29	; 62
- 29a:	0f be       	out	0x3f, r0	; 63
- 29c:	cd bf       	out	0x3d, r28	; 61
- 29e:	df 91       	pop	r29
- 2a0:	cf 91       	pop	r28
- 2a2:	08 95       	ret
+ 29e:	60 96       	adiw	r28, 0x10	; 16
+ 2a0:	0f b6       	in	r0, 0x3f	; 63
+ 2a2:	f8 94       	cli
+ 2a4:	de bf       	out	0x3e, r29	; 62
+ 2a6:	0f be       	out	0x3f, r0	; 63
+ 2a8:	cd bf       	out	0x3d, r28	; 61
+ 2aa:	df 91       	pop	r29
+ 2ac:	cf 91       	pop	r28
+ 2ae:	08 95       	ret
 
-000002a4 <main>:
+000002b0 <main>:
 
 volatile uint8_t i __attribute__((address (0x402)));
 
 int main(void)
 {
+								clrRam();
+ 2b0:	0e 94 d9 00 	call	0x1b2	; 0x1b2 <clrRam>
 								taskCounter = 0;
- 2a4:	10 92 00 04 	sts	0x0400, r1	; 0x800400 <_end+0x300>
+ 2b4:	10 92 00 04 	sts	0x0400, r1	; 0x800400 <_end+0x300>
 								numberOfTasks = 0;
- 2a8:	10 92 01 04 	sts	0x0401, r1	; 0x800401 <_end+0x301>
+ 2b8:	10 92 01 04 	sts	0x0401, r1	; 0x800401 <_end+0x301>
 								DDRE |= 1 << 0; // heartbeat pin
- 2ac:	68 9a       	sbi	0x0d, 0	; 13
+ 2bc:	68 9a       	sbi	0x0d, 0	; 13
 								DDRB |= 1 << 5;
- 2ae:	25 9a       	sbi	0x04, 5	; 4
+ 2be:	25 9a       	sbi	0x04, 5	; 4
 
 								i = 0;
- 2b0:	10 92 02 04 	sts	0x0402, r1	; 0x800402 <_end+0x302>
+ 2c0:	10 92 02 04 	sts	0x0402, r1	; 0x800402 <_end+0x302>
 
-								tickTimerSetup();
- 2b4:	0e 94 f5 00 	call	0x1ea	; 0x1ea <tickTimerSetup>
 								
 
 								createTask(blinkyTaskFunction);
- 2b8:	81 ef       	ldi	r24, 0xF1	; 241
- 2ba:	90 e0       	ldi	r25, 0x00	; 0
- 2bc:	0e 94 04 01 	call	0x208	; 0x208 <createTask>
+ 2c4:	85 ed       	ldi	r24, 0xD5	; 213
+ 2c6:	90 e0       	ldi	r25, 0x00	; 0
+ 2c8:	0e 94 f7 00 	call	0x1ee	; 0x1ee <createTask>
 								createTask(blinkyTask2Function);
- 2c0:	83 ef       	ldi	r24, 0xF3	; 243
- 2c2:	90 e0       	ldi	r25, 0x00	; 0
- 2c4:	0e 94 04 01 	call	0x208	; 0x208 <createTask>
-								
+ 2cc:	87 ed       	ldi	r24, 0xD7	; 215
+ 2ce:	90 e0       	ldi	r25, 0x00	; 0
+ 2d0:	0e 94 f7 00 	call	0x1ee	; 0x1ee <createTask>
+
+								tickTimerSetup();								
+ 2d4:	0e 94 e4 00 	call	0x1c8	; 0x1c8 <tickTimerSetup>
 								sei();
- 2c8:	78 94       	sei
+ 2d8:	78 94       	sei
 								
 								taskArray[0].taskFunction();
- 2ca:	e0 91 02 01 	lds	r30, 0x0102	; 0x800102 <_end+0x2>
- 2ce:	f0 91 03 01 	lds	r31, 0x0103	; 0x800103 <_end+0x3>
- 2d2:	09 95       	icall
+ 2da:	e0 91 02 01 	lds	r30, 0x0102	; 0x800102 <_end+0x2>
+ 2de:	f0 91 03 01 	lds	r31, 0x0103	; 0x800103 <_end+0x3>
+ 2e2:	09 95       	icall
 
 								/* Replace with your application code */
 								while (1)
 								{
 																i++;
- 2d4:	80 91 02 04 	lds	r24, 0x0402	; 0x800402 <_end+0x302>
- 2d8:	8f 5f       	subi	r24, 0xFF	; 255
- 2da:	80 93 02 04 	sts	0x0402, r24	; 0x800402 <_end+0x302>
- 2de:	fa cf       	rjmp	.-12     	; 0x2d4 <main+0x30>
+ 2e4:	80 91 02 04 	lds	r24, 0x0402	; 0x800402 <_end+0x302>
+ 2e8:	8f 5f       	subi	r24, 0xFF	; 255
+ 2ea:	80 93 02 04 	sts	0x0402, r24	; 0x800402 <_end+0x302>
+ 2ee:	fa cf       	rjmp	.-12     	; 0x2e4 <main+0x34>
 
-000002e0 <_exit>:
- 2e0:	f8 94       	cli
+000002f0 <_exit>:
+ 2f0:	f8 94       	cli
 
-000002e2 <__stop_program>:
- 2e2:	ff cf       	rjmp	.-2      	; 0x2e2 <__stop_program>
+000002f2 <__stop_program>:
+ 2f2:	ff cf       	rjmp	.-2      	; 0x2f2 <__stop_program>
