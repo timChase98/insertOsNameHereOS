@@ -3,29 +3,29 @@ insertOsNameHereOS.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  00000348  2**0
+  0 .data         00000000  00800100  00800100  00000430  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000002f4  00000000  00000000  00000054  2**1
+  1 .text         000003dc  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  00000348  2**0
+  2 .comment      00000030  00000000  00000000  00000430  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000378  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000460  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000068  00000000  00000000  000003b8  2**3
+  4 .debug_aranges 00000080  00000000  00000000  000004a0  2**3
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00000c28  00000000  00000000  00000420  2**0
+  5 .debug_info   00000d08  00000000  00000000  00000520  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 00000a20  00000000  00000000  00001048  2**0
+  6 .debug_abbrev 00000a97  00000000  00000000  00001228  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   00000630  00000000  00000000  00001a68  2**0
+  7 .debug_line   000006c5  00000000  00000000  00001cbf  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000084  00000000  00000000  00002098  2**2
+  8 .debug_frame  000000c0  00000000  00000000  00002384  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000055c  00000000  00000000  0000211c  2**0
+  9 .debug_str    000005a1  00000000  00000000  00002444  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    00000206  00000000  00000000  00002678  2**0
+ 10 .debug_loc    000002be  00000000  00000000  000029e5  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000038  00000000  00000000  0000287e  2**0
+ 11 .debug_ranges 00000050  00000000  00000000  00002ca3  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -84,14 +84,14 @@ Disassembly of section .text:
   ba:	d8 e0       	ldi	r29, 0x08	; 8
   bc:	de bf       	out	0x3e, r29	; 62
   be:	cd bf       	out	0x3d, r28	; 61
-  c0:	0e 94 58 01 	call	0x2b0	; 0x2b0 <main>
-  c4:	0c 94 78 01 	jmp	0x2f0	; 0x2f0 <_exit>
+  c0:	0e 94 62 01 	call	0x2c4	; 0x2c4 <main>
+  c4:	0c 94 ec 01 	jmp	0x3d8	; 0x3d8 <_exit>
 
 000000c8 <__bad_interrupt>:
   c8:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 000000cc <os>:
- .global LoadSTATE
+
 
  .global os
 os:
@@ -101,12 +101,12 @@ os:
 	ret
   ce:	08 95       	ret
 
-000000d0 <yeild>:
+000000d0 <yield>:
 
-.global yeild
-yeild:
-  JMP yeild ; Spin.  This should do something more usefull later
-  d0:	0c 94 68 00 	jmp	0xd0	; 0xd0 <yeild>
+.global yield
+yield:
+  JMP yield ; Spin.  This should do something more usefull later
+  d0:	0c 94 68 00 	jmp	0xd0	; 0xd0 <yield>
 
 000000d4 <__vector_42>:
 
@@ -227,377 +227,554 @@ TIMER4_COMPA_vect:
     ST Z+, R1
  138:	11 92       	st	Z+, r1
 
-   INC R17; increment task counter
- 13a:	13 95       	inc	r17
-  CP R17, R18
- 13c:	12 17       	cp	r17, r18
-  BRLO TaskNotOverflowed ; brach if lower
- 13e:	08 f0       	brcs	.+2      	; 0x142 <TaskNotOverflowed>
-  CLR R17; if taskCounter >= numberOfTasks reset to task 0
- 140:	11 27       	eor	r17, r17
-
-00000142 <TaskNotOverflowed>:
-  TaskNotOverflowed:
+  call incrementTask
+ 13a:	0e 94 a3 01 	call	0x346	; 0x346 <incrementTask>
+;   INC R17; increment task counter
+;  CP R17, R18
+;  BRLO TaskNotOverflowed ; brach if lower
+;  CLR R17; if taskCounter >= numberOfTasks reset to task 0
+;  TaskNotOverflowed:
   LDI ZL, TASKCOUNTERADDR_L
- 142:	e0 e0       	ldi	r30, 0x00	; 0
+ 13e:	e0 e0       	ldi	r30, 0x00	; 0
   LDI ZH, TASKCOUNTERADDR_H
- 144:	f4 e0       	ldi	r31, 0x04	; 4
-  ST Z, R17
- 146:	10 83       	st	Z, r17
+ 140:	f4 e0       	ldi	r31, 0x04	; 4
+  LD R17, Z
+ 142:	10 81       	ld	r17, Z
 
-00000148 <LOADSTATE>:
-
+00000144 <LOADSTATE>:
+  ; its not its part of the ISR but this should magically fix things 
+  .global LOADSTATE
   LOADSTATE:
   ; Load saved state
     ; get saved SP
       LDI R16, 16
- 148:	00 e1       	ldi	r16, 0x10	; 16
+ 144:	00 e1       	ldi	r16, 0x10	; 16
       MUL R17, R16; multiply task counter by 16 and put the result in R0
- 14a:	10 9f       	mul	r17, r16
+ 146:	10 9f       	mul	r17, r16
       LDI ZL, STARTOFTASKLIST_L + 8; program counter address in task list
- 14c:	e8 e0       	ldi	r30, 0x08	; 8
+ 148:	e8 e0       	ldi	r30, 0x08	; 8
       LDI ZH, STARTOFTASKLIST_H
- 14e:	f1 e0       	ldi	r31, 0x01	; 1
+ 14a:	f1 e0       	ldi	r31, 0x01	; 1
       ; task counter to offset
       ADD ZL, R0;
- 150:	e0 0d       	add	r30, r0
+ 14c:	e0 0d       	add	r30, r0
       ADC ZH, R1; does a 16bit add correct address now in Z register
- 152:	f1 1d       	adc	r31, r1
+ 14e:	f1 1d       	adc	r31, r1
       LD R0, Z+; SPL
- 154:	01 90       	ld	r0, Z+
+ 150:	01 90       	ld	r0, Z+
+      PUSH R0
+ 152:	0f 92       	push	r0
+      LD R0, Z; SPH
+ 154:	00 80       	ld	r0, Z
       PUSH R0
  156:	0f 92       	push	r0
-      LD R0, Z; SPH
- 158:	00 80       	ld	r0, Z
-      PUSH R0
- 15a:	0f 92       	push	r0
 
 
     ; restore stack pointer 
       POP R1; SPH
- 15c:	1f 90       	pop	r1
+ 158:	1f 90       	pop	r1
       POP R0; SPL
- 15e:	0f 90       	pop	r0
+ 15a:	0f 90       	pop	r0
       OUT _SFR_IO_ADDR(SPH), R1
- 160:	1e be       	out	0x3e, r1	; 62
+ 15c:	1e be       	out	0x3e, r1	; 62
       OUT _SFR_IO_ADDR(SPL), R0
- 162:	0d be       	out	0x3d, r0	; 61
+ 15e:	0d be       	out	0x3d, r0	; 61
       
 
 	POP R0
- 164:	0f 90       	pop	r0
+ 160:	0f 90       	pop	r0
 	POP R1
- 166:	1f 90       	pop	r1
+ 162:	1f 90       	pop	r1
 	OUT _SFR_IO_ADDR(SREG), R1; put the Status register back 
- 168:	1f be       	out	0x3f, r1	; 63
+ 164:	1f be       	out	0x3f, r1	; 63
 	POP R2
- 16a:	2f 90       	pop	r2
+ 166:	2f 90       	pop	r2
 	POP R3
- 16c:	3f 90       	pop	r3
+ 168:	3f 90       	pop	r3
 	POP R4
- 16e:	4f 90       	pop	r4
+ 16a:	4f 90       	pop	r4
 	POP R5
- 170:	5f 90       	pop	r5
+ 16c:	5f 90       	pop	r5
 	POP R6
- 172:	6f 90       	pop	r6
+ 16e:	6f 90       	pop	r6
 	POP R7
- 174:	7f 90       	pop	r7
+ 170:	7f 90       	pop	r7
 	POP R8
- 176:	8f 90       	pop	r8
+ 172:	8f 90       	pop	r8
 	POP R9
- 178:	9f 90       	pop	r9
+ 174:	9f 90       	pop	r9
 	POP R10
- 17a:	af 90       	pop	r10
+ 176:	af 90       	pop	r10
 	POP R11
- 17c:	bf 90       	pop	r11
+ 178:	bf 90       	pop	r11
 	POP R12
- 17e:	cf 90       	pop	r12
+ 17a:	cf 90       	pop	r12
 	POP R13
- 180:	df 90       	pop	r13
+ 17c:	df 90       	pop	r13
 	POP R14
- 182:	ef 90       	pop	r14
+ 17e:	ef 90       	pop	r14
 	POP R15
- 184:	ff 90       	pop	r15
+ 180:	ff 90       	pop	r15
 	POP R16
- 186:	0f 91       	pop	r16
+ 182:	0f 91       	pop	r16
 	POP R17
- 188:	1f 91       	pop	r17
+ 184:	1f 91       	pop	r17
 	POP R18
- 18a:	2f 91       	pop	r18
+ 186:	2f 91       	pop	r18
 	POP R19
- 18c:	3f 91       	pop	r19
+ 188:	3f 91       	pop	r19
 	POP R20
- 18e:	4f 91       	pop	r20
+ 18a:	4f 91       	pop	r20
 	POP R21
- 190:	5f 91       	pop	r21
+ 18c:	5f 91       	pop	r21
 	POP R22
- 192:	6f 91       	pop	r22
+ 18e:	6f 91       	pop	r22
 	POP R23
- 194:	7f 91       	pop	r23
+ 190:	7f 91       	pop	r23
 	POP R24
- 196:	8f 91       	pop	r24
+ 192:	8f 91       	pop	r24
 	POP R25
- 198:	9f 91       	pop	r25
+ 194:	9f 91       	pop	r25
 	POP R26
- 19a:	af 91       	pop	r26
+ 196:	af 91       	pop	r26
 	POP R27
- 19c:	bf 91       	pop	r27
+ 198:	bf 91       	pop	r27
 	POP R28
- 19e:	cf 91       	pop	r28
+ 19a:	cf 91       	pop	r28
 	POP R29
- 1a0:	df 91       	pop	r29
+ 19c:	df 91       	pop	r29
 	POP R30
- 1a2:	ef 91       	pop	r30
+ 19e:	ef 91       	pop	r30
 	POP R31
- 1a4:	ff 91       	pop	r31
+ 1a0:	ff 91       	pop	r31
 	CLR R1
- 1a6:	11 24       	eor	r1, r1
+ 1a2:	11 24       	eor	r1, r1
     ; PC shoudld be on stack
 
   reti
- 1a8:	18 95       	reti
+ 1a4:	18 95       	reti
 
-000001aa <blinkyTaskFunction>:
-}
-
-
-void blinkyTaskFunction(){
-								while (1) {
-																PORTB |= 1 << 5;
- 1aa:	2d 9a       	sbi	0x05, 5	; 5
- 1ac:	fe cf       	rjmp	.-4      	; 0x1aa <blinkyTaskFunction>
-
-000001ae <blinkyTask2Function>:
-								}
-}
-void blinkyTask2Function(){
-								while (1) {
-																PORTB &= ~(1 << 5);
- 1ae:	2d 98       	cbi	0x05, 5	; 5
- 1b0:	fe cf       	rjmp	.-4      	; 0x1ae <blinkyTask2Function>
-
-000001b2 <clrRam>:
-																i++;
-								}
-}
-
-void clrRam(){
-	for(uint16_t* i = 0x100; i < 0x700; i++){
- 1b2:	e0 e0       	ldi	r30, 0x00	; 0
- 1b4:	f1 e0       	ldi	r31, 0x01	; 1
-		*i = 0xAABB;
- 1b6:	8b eb       	ldi	r24, 0xBB	; 187
- 1b8:	9a ea       	ldi	r25, 0xAA	; 170
- 1ba:	81 93       	st	Z+, r24
- 1bc:	91 93       	st	Z+, r25
-																i++;
-								}
-}
-
-void clrRam(){
-	for(uint16_t* i = 0x100; i < 0x700; i++){
- 1be:	e1 15       	cp	r30, r1
- 1c0:	27 e0       	ldi	r18, 0x07	; 7
- 1c2:	f2 07       	cpc	r31, r18
- 1c4:	d1 f7       	brne	.-12     	; 0x1ba <clrRam+0x8>
-		*i = 0xAABB;
+000001a6 <blinkyTaskFunction>:
 	}
 }
- 1c6:	08 95       	ret
 
-000001c8 <tickTimerSetup>:
+void blinkyTaskFunction(){
+	while (1) {
+		PORTB |= 1 << 5;
+ 1a6:	2d 9a       	sbi	0x05, 5	; 5
+ 1a8:	fe cf       	rjmp	.-4      	; 0x1a6 <blinkyTaskFunction>
+
+000001aa <blinkyTask2Function>:
+	}
+}
+void blinkyTask2Function(){
+	while (1) {
+		PORTB &= ~(1 << 5);
+ 1aa:	2d 98       	cbi	0x05, 5	; 5
+ 1ac:	fe cf       	rjmp	.-4      	; 0x1aa <blinkyTask2Function>
+
+000001ae <clrRam>:
+	}
+}
+
+void clrRam(){
+	// hella sketch
+	for(uint16_t* i = 0x100; i < 0x700; i++){
+ 1ae:	e0 e0       	ldi	r30, 0x00	; 0
+ 1b0:	f1 e0       	ldi	r31, 0x01	; 1
+		*i = 0x0000;
+ 1b2:	11 92       	st	Z+, r1
+ 1b4:	11 92       	st	Z+, r1
+	}
+}
+
+void clrRam(){
+	// hella sketch
+	for(uint16_t* i = 0x100; i < 0x700; i++){
+ 1b6:	e1 15       	cp	r30, r1
+ 1b8:	87 e0       	ldi	r24, 0x07	; 7
+ 1ba:	f8 07       	cpc	r31, r24
+ 1bc:	d1 f7       	brne	.-12     	; 0x1b2 <clrRam+0x4>
+		*i = 0x0000;
+	}
+}
+ 1be:	08 95       	ret
+
+000001c0 <tickTimerSetup>:
 
 void tickTimerSetup(){
-								TCCR4A = 0;
- 1c8:	10 92 a0 00 	sts	0x00A0, r1	; 0x8000a0 <__TEXT_REGION_LENGTH__+0x7e00a0>
-								// ctc mode		// clk / 8
-								TCCR4B = (1 << WGM42) | (0b010 << CS40);
- 1cc:	8a e0       	ldi	r24, 0x0A	; 10
- 1ce:	80 93 a1 00 	sts	0x00A1, r24	; 0x8000a1 <__TEXT_REGION_LENGTH__+0x7e00a1>
-								OCR4A = TIMER_TICK_TIME_LOAD_VALUE;
- 1d2:	80 ed       	ldi	r24, 0xD0	; 208
- 1d4:	97 e0       	ldi	r25, 0x07	; 7
- 1d6:	90 93 a9 00 	sts	0x00A9, r25	; 0x8000a9 <__TEXT_REGION_LENGTH__+0x7e00a9>
- 1da:	80 93 a8 00 	sts	0x00A8, r24	; 0x8000a8 <__TEXT_REGION_LENGTH__+0x7e00a8>
-								TIMSK4 = 1 << OCIE4A;
- 1de:	82 e0       	ldi	r24, 0x02	; 2
- 1e0:	80 93 72 00 	sts	0x0072, r24	; 0x800072 <__TEXT_REGION_LENGTH__+0x7e0072>
-								TCNT4 = 0;
- 1e4:	10 92 a5 00 	sts	0x00A5, r1	; 0x8000a5 <__TEXT_REGION_LENGTH__+0x7e00a5>
- 1e8:	10 92 a4 00 	sts	0x00A4, r1	; 0x8000a4 <__TEXT_REGION_LENGTH__+0x7e00a4>
- 1ec:	08 95       	ret
+	TCCR4A = 0;
+ 1c0:	10 92 a0 00 	sts	0x00A0, r1	; 0x8000a0 <__TEXT_REGION_LENGTH__+0x7e00a0>
+	// ctc mode		// clk / 8
+	TCCR4B = (1 << WGM42) | (0b010 << CS40);
+ 1c4:	8a e0       	ldi	r24, 0x0A	; 10
+ 1c6:	80 93 a1 00 	sts	0x00A1, r24	; 0x8000a1 <__TEXT_REGION_LENGTH__+0x7e00a1>
+	OCR4A = TIMER_TICK_TIME_LOAD_VALUE;
+ 1ca:	80 ed       	ldi	r24, 0xD0	; 208
+ 1cc:	97 e0       	ldi	r25, 0x07	; 7
+ 1ce:	90 93 a9 00 	sts	0x00A9, r25	; 0x8000a9 <__TEXT_REGION_LENGTH__+0x7e00a9>
+ 1d2:	80 93 a8 00 	sts	0x00A8, r24	; 0x8000a8 <__TEXT_REGION_LENGTH__+0x7e00a8>
+	TIMSK4 = 1 << OCIE4A;
+ 1d6:	82 e0       	ldi	r24, 0x02	; 2
+ 1d8:	80 93 72 00 	sts	0x0072, r24	; 0x800072 <__TEXT_REGION_LENGTH__+0x7e0072>
+	TCNT4 = 0;
+ 1dc:	10 92 a5 00 	sts	0x00A5, r1	; 0x8000a5 <__TEXT_REGION_LENGTH__+0x7e00a5>
+ 1e0:	10 92 a4 00 	sts	0x00A4, r1	; 0x8000a4 <__TEXT_REGION_LENGTH__+0x7e00a4>
+ 1e4:	08 95       	ret
 
-000001ee <createTask>:
+000001e6 <createTask>:
 }
 
 void createTask(void (*taskF)(void)){
- 1ee:	cf 93       	push	r28
- 1f0:	df 93       	push	r29
- 1f2:	cd b7       	in	r28, 0x3d	; 61
- 1f4:	de b7       	in	r29, 0x3e	; 62
- 1f6:	60 97       	sbiw	r28, 0x10	; 16
- 1f8:	0f b6       	in	r0, 0x3f	; 63
- 1fa:	f8 94       	cli
- 1fc:	de bf       	out	0x3e, r29	; 62
- 1fe:	0f be       	out	0x3f, r0	; 63
- 200:	cd bf       	out	0x3d, r28	; 61
-								Task t = taskArray[numberOfTasks]; // get memory for task
- 202:	20 91 01 04 	lds	r18, 0x0401	; 0x800401 <_end+0x301>
- 206:	30 e0       	ldi	r19, 0x00	; 0
- 208:	f9 01       	movw	r30, r18
- 20a:	e2 95       	swap	r30
- 20c:	f2 95       	swap	r31
- 20e:	f0 7f       	andi	r31, 0xF0	; 240
- 210:	fe 27       	eor	r31, r30
- 212:	e0 7f       	andi	r30, 0xF0	; 240
- 214:	fe 27       	eor	r31, r30
- 216:	e0 50       	subi	r30, 0x00	; 0
- 218:	ff 4f       	sbci	r31, 0xFF	; 255
- 21a:	40 e1       	ldi	r20, 0x10	; 16
- 21c:	de 01       	movw	r26, r28
- 21e:	11 96       	adiw	r26, 0x01	; 1
- 220:	01 90       	ld	r0, Z+
- 222:	0d 92       	st	X+, r0
- 224:	4a 95       	dec	r20
- 226:	e1 f7       	brne	.-8      	; 0x220 <createTask+0x32>
-								t.placeHolder = 0xAABB; 
-								t.placeHolder2 = 0xCCDD; 
-								t.placeHolder3 = 0xEEFF; 
-								t.state = WAITING;
-								t.programCounter = taskF;
-								t.stackPointer = 0x043F + 64 * numberOfTasks - 34; 
- 228:	b9 01       	movw	r22, r18
- 22a:	00 24       	eor	r0, r0
- 22c:	76 95       	lsr	r23
- 22e:	67 95       	ror	r22
- 230:	07 94       	ror	r0
- 232:	76 95       	lsr	r23
- 234:	67 95       	ror	r22
- 236:	07 94       	ror	r0
- 238:	76 2f       	mov	r23, r22
- 23a:	60 2d       	mov	r22, r0
-								
-								// sketchy hard coded pointer stuff 
-								uint16_t defNotAPtrtoTaskF = taskF; // compilers suck 
-								uint8_t* ptrToStackIntial = 0x043F + 64 * numberOfTasks -1;
- 23c:	fb 01       	movw	r30, r22
- 23e:	e2 5c       	subi	r30, 0xC2	; 194
- 240:	fb 4f       	sbci	r31, 0xFB	; 251
-								*ptrToStackIntial = defNotAPtrtoTaskF >> 8;
- 242:	90 83       	st	Z, r25
-								ptrToStackIntial += 1; 
-								*ptrToStackIntial = defNotAPtrtoTaskF & 0xFF;
- 244:	81 83       	std	Z+1, r24	; 0x01
-								
+ 1e6:	cf 93       	push	r28
+ 1e8:	df 93       	push	r29
+ 1ea:	cd b7       	in	r28, 0x3d	; 61
+ 1ec:	de b7       	in	r29, 0x3e	; 62
+ 1ee:	60 97       	sbiw	r28, 0x10	; 16
+ 1f0:	0f b6       	in	r0, 0x3f	; 63
+ 1f2:	f8 94       	cli
+ 1f4:	de bf       	out	0x3e, r29	; 62
+ 1f6:	0f be       	out	0x3f, r0	; 63
+ 1f8:	cd bf       	out	0x3d, r28	; 61
+	uint8_t firstOpenIndex = 0; 
+	Task t;
+	
+	// find the first open slot for a task 
+	while(1){
+		t = taskArray[firstOpenIndex];
+ 1fa:	20 e1       	ldi	r18, 0x10	; 16
+ 1fc:	e0 e0       	ldi	r30, 0x00	; 0
+ 1fe:	f1 e0       	ldi	r31, 0x01	; 1
+ 200:	de 01       	movw	r26, r28
+ 202:	11 96       	adiw	r26, 0x01	; 1
+ 204:	01 90       	ld	r0, Z+
+ 206:	0d 92       	st	X+, r0
+ 208:	2a 95       	dec	r18
+ 20a:	e1 f7       	brne	.-8      	; 0x204 <createTask+0x1e>
+		if (t.taskFunction == 0) break;
+ 20c:	2b 81       	ldd	r18, Y+3	; 0x03
+ 20e:	3c 81       	ldd	r19, Y+4	; 0x04
+ 210:	23 2b       	or	r18, r19
+ 212:	99 f0       	breq	.+38     	; 0x23a <createTask+0x54>
+ 214:	20 e0       	ldi	r18, 0x00	; 0
+		firstOpenIndex++; 
+ 216:	2f 5f       	subi	r18, 0xFF	; 255
+	uint8_t firstOpenIndex = 0; 
+	Task t;
+	
+	// find the first open slot for a task 
+	while(1){
+		t = taskArray[firstOpenIndex];
+ 218:	30 e1       	ldi	r19, 0x10	; 16
+ 21a:	23 9f       	mul	r18, r19
+ 21c:	f0 01       	movw	r30, r0
+ 21e:	11 24       	eor	r1, r1
+ 220:	e0 50       	subi	r30, 0x00	; 0
+ 222:	ff 4f       	sbci	r31, 0xFF	; 255
+ 224:	30 e1       	ldi	r19, 0x10	; 16
+ 226:	de 01       	movw	r26, r28
+ 228:	11 96       	adiw	r26, 0x01	; 1
+ 22a:	01 90       	ld	r0, Z+
+ 22c:	0d 92       	st	X+, r0
+ 22e:	3a 95       	dec	r19
+ 230:	e1 f7       	brne	.-8      	; 0x22a <createTask+0x44>
+		if (t.taskFunction == 0) break;
+ 232:	4b 81       	ldd	r20, Y+3	; 0x03
+ 234:	5c 81       	ldd	r21, Y+4	; 0x04
+ 236:	45 2b       	or	r20, r21
+ 238:	71 f7       	brne	.-36     	; 0x216 <createTask+0x30>
+		firstOpenIndex++; 
+		
+	}
+	
+	t.taskID = numberOfTasks; // tasks start at 1
+ 23a:	60 91 01 04 	lds	r22, 0x0401	; 0x800401 <_end+0x301>
+	t.placeHolder = (uint16_t *) 0xAABB;
+	t.placeHolder2 = (uint16_t *) 0xCCDD;
+	t.placeHolder3 = (uint16_t *) 0xEEFF;
+	t.state = READY;
+	t.programCounter = taskF;
+	t.stackPointer = 0x043F + 64 * numberOfTasks - 34;
+ 23e:	70 e0       	ldi	r23, 0x00	; 0
+ 240:	ab 01       	movw	r20, r22
+ 242:	00 24       	eor	r0, r0
+ 244:	56 95       	lsr	r21
+ 246:	47 95       	ror	r20
+ 248:	07 94       	ror	r0
+ 24a:	56 95       	lsr	r21
+ 24c:	47 95       	ror	r20
+ 24e:	07 94       	ror	r0
+ 250:	54 2f       	mov	r21, r20
+ 252:	40 2d       	mov	r20, r0
+	
+	// sketchy hard coded pointer stuff
+	uint16_t defNotAPtrtoTaskF = taskF; // compilers suck
+	uint8_t* ptrToStackIntial = 0x043F + 64 * numberOfTasks -1;
+ 254:	fa 01       	movw	r30, r20
+ 256:	e2 5c       	subi	r30, 0xC2	; 194
+ 258:	fb 4f       	sbci	r31, 0xFB	; 251
+	*ptrToStackIntial = defNotAPtrtoTaskF >> 8;
+ 25a:	90 83       	st	Z, r25
+	ptrToStackIntial += 1;
+	*ptrToStackIntial = defNotAPtrtoTaskF & 0xFF;
+ 25c:	81 83       	std	Z+1, r24	; 0x01
+	
 
-								taskArray[numberOfTasks] = t;
- 246:	40 91 01 04 	lds	r20, 0x0401	; 0x800401 <_end+0x301>
- 24a:	3a 83       	std	Y+2, r19	; 0x02
- 24c:	29 83       	std	Y+1, r18	; 0x01
- 24e:	8b 83       	std	Y+3, r24	; 0x03
- 250:	9c 83       	std	Y+4, r25	; 0x04
- 252:	2b eb       	ldi	r18, 0xBB	; 187
- 254:	3a ea       	ldi	r19, 0xAA	; 170
- 256:	3e 83       	std	Y+6, r19	; 0x06
- 258:	2d 83       	std	Y+5, r18	; 0x05
- 25a:	22 e0       	ldi	r18, 0x02	; 2
- 25c:	30 e0       	ldi	r19, 0x00	; 0
- 25e:	38 87       	std	Y+8, r19	; 0x08
- 260:	2f 83       	std	Y+7, r18	; 0x07
- 262:	63 5e       	subi	r22, 0xE3	; 227
- 264:	7b 4f       	sbci	r23, 0xFB	; 251
- 266:	7a 87       	std	Y+10, r23	; 0x0a
- 268:	69 87       	std	Y+9, r22	; 0x09
- 26a:	8b 87       	std	Y+11, r24	; 0x0b
- 26c:	9c 87       	std	Y+12, r25	; 0x0c
- 26e:	8d ed       	ldi	r24, 0xDD	; 221
- 270:	9c ec       	ldi	r25, 0xCC	; 204
- 272:	9e 87       	std	Y+14, r25	; 0x0e
- 274:	8d 87       	std	Y+13, r24	; 0x0d
- 276:	8f ef       	ldi	r24, 0xFF	; 255
- 278:	9e ee       	ldi	r25, 0xEE	; 238
- 27a:	98 8b       	std	Y+16, r25	; 0x10
- 27c:	8f 87       	std	Y+15, r24	; 0x0f
- 27e:	80 e1       	ldi	r24, 0x10	; 16
- 280:	48 9f       	mul	r20, r24
- 282:	d0 01       	movw	r26, r0
- 284:	11 24       	eor	r1, r1
- 286:	a0 50       	subi	r26, 0x00	; 0
- 288:	bf 4f       	sbci	r27, 0xFF	; 255
- 28a:	80 e1       	ldi	r24, 0x10	; 16
- 28c:	fe 01       	movw	r30, r28
- 28e:	31 96       	adiw	r30, 0x01	; 1
- 290:	01 90       	ld	r0, Z+
- 292:	0d 92       	st	X+, r0
- 294:	8a 95       	dec	r24
- 296:	e1 f7       	brne	.-8      	; 0x290 <createTask+0xa2>
+	taskArray[numberOfTasks] = t;
+ 25e:	20 91 01 04 	lds	r18, 0x0401	; 0x800401 <_end+0x301>
+ 262:	7a 83       	std	Y+2, r23	; 0x02
+ 264:	69 83       	std	Y+1, r22	; 0x01
+ 266:	8b 83       	std	Y+3, r24	; 0x03
+ 268:	9c 83       	std	Y+4, r25	; 0x04
+ 26a:	6b eb       	ldi	r22, 0xBB	; 187
+ 26c:	7a ea       	ldi	r23, 0xAA	; 170
+ 26e:	7e 83       	std	Y+6, r23	; 0x06
+ 270:	6d 83       	std	Y+5, r22	; 0x05
+ 272:	18 86       	std	Y+8, r1	; 0x08
+ 274:	1f 82       	std	Y+7, r1	; 0x07
+ 276:	43 5e       	subi	r20, 0xE3	; 227
+ 278:	5b 4f       	sbci	r21, 0xFB	; 251
+ 27a:	5a 87       	std	Y+10, r21	; 0x0a
+ 27c:	49 87       	std	Y+9, r20	; 0x09
+ 27e:	8b 87       	std	Y+11, r24	; 0x0b
+ 280:	9c 87       	std	Y+12, r25	; 0x0c
+ 282:	8d ed       	ldi	r24, 0xDD	; 221
+ 284:	9c ec       	ldi	r25, 0xCC	; 204
+ 286:	9e 87       	std	Y+14, r25	; 0x0e
+ 288:	8d 87       	std	Y+13, r24	; 0x0d
+ 28a:	8f ef       	ldi	r24, 0xFF	; 255
+ 28c:	9e ee       	ldi	r25, 0xEE	; 238
+ 28e:	98 8b       	std	Y+16, r25	; 0x10
+ 290:	8f 87       	std	Y+15, r24	; 0x0f
+ 292:	80 e1       	ldi	r24, 0x10	; 16
+ 294:	28 9f       	mul	r18, r24
+ 296:	d0 01       	movw	r26, r0
+ 298:	11 24       	eor	r1, r1
+ 29a:	a0 50       	subi	r26, 0x00	; 0
+ 29c:	bf 4f       	sbci	r27, 0xFF	; 255
+ 29e:	80 e1       	ldi	r24, 0x10	; 16
+ 2a0:	fe 01       	movw	r30, r28
+ 2a2:	31 96       	adiw	r30, 0x01	; 1
+ 2a4:	01 90       	ld	r0, Z+
+ 2a6:	0d 92       	st	X+, r0
+ 2a8:	8a 95       	dec	r24
+ 2aa:	e1 f7       	brne	.-8      	; 0x2a4 <createTask+0xbe>
 
-								numberOfTasks++;// increment total number of tasks
- 298:	4f 5f       	subi	r20, 0xFF	; 255
- 29a:	40 93 01 04 	sts	0x0401, r20	; 0x800401 <_end+0x301>
+	numberOfTasks++;// increment total number of tasks
+ 2ac:	2f 5f       	subi	r18, 0xFF	; 255
+ 2ae:	20 93 01 04 	sts	0x0401, r18	; 0x800401 <_end+0x301>
 }
- 29e:	60 96       	adiw	r28, 0x10	; 16
- 2a0:	0f b6       	in	r0, 0x3f	; 63
- 2a2:	f8 94       	cli
- 2a4:	de bf       	out	0x3e, r29	; 62
- 2a6:	0f be       	out	0x3f, r0	; 63
- 2a8:	cd bf       	out	0x3d, r28	; 61
- 2aa:	df 91       	pop	r29
- 2ac:	cf 91       	pop	r28
- 2ae:	08 95       	ret
+ 2b2:	60 96       	adiw	r28, 0x10	; 16
+ 2b4:	0f b6       	in	r0, 0x3f	; 63
+ 2b6:	f8 94       	cli
+ 2b8:	de bf       	out	0x3e, r29	; 62
+ 2ba:	0f be       	out	0x3f, r0	; 63
+ 2bc:	cd bf       	out	0x3d, r28	; 61
+ 2be:	df 91       	pop	r29
+ 2c0:	cf 91       	pop	r28
+ 2c2:	08 95       	ret
 
-000002b0 <main>:
+000002c4 <main>:
 
 volatile uint8_t i __attribute__((address (0x402)));
 
 int main(void)
 {
-								clrRam();
- 2b0:	0e 94 d9 00 	call	0x1b2	; 0x1b2 <clrRam>
-								taskCounter = 0;
- 2b4:	10 92 00 04 	sts	0x0400, r1	; 0x800400 <_end+0x300>
-								numberOfTasks = 0;
- 2b8:	10 92 01 04 	sts	0x0401, r1	; 0x800401 <_end+0x301>
-								DDRE |= 1 << 0; // heartbeat pin
- 2bc:	68 9a       	sbi	0x0d, 0	; 13
-								DDRB |= 1 << 5;
- 2be:	25 9a       	sbi	0x04, 5	; 4
+	clrRam();
+ 2c4:	0e 94 d7 00 	call	0x1ae	; 0x1ae <clrRam>
+	taskCounter = 0;
+ 2c8:	10 92 00 04 	sts	0x0400, r1	; 0x800400 <_end+0x300>
+	numberOfTasks = 0;
+ 2cc:	10 92 01 04 	sts	0x0401, r1	; 0x800401 <_end+0x301>
+	DDRC |= 1 << 0; // heartbeat pin
+ 2d0:	38 9a       	sbi	0x07, 0	; 7
+	DDRB |= 1 << 5;
+ 2d2:	25 9a       	sbi	0x04, 5	; 4
 
-								i = 0;
- 2c0:	10 92 02 04 	sts	0x0402, r1	; 0x800402 <_end+0x302>
+	i = 0;
+ 2d4:	10 92 02 04 	sts	0x0402, r1	; 0x800402 <_end+0x302>
 
-								
+	
 
-								createTask(blinkyTaskFunction);
- 2c4:	85 ed       	ldi	r24, 0xD5	; 213
- 2c6:	90 e0       	ldi	r25, 0x00	; 0
- 2c8:	0e 94 f7 00 	call	0x1ee	; 0x1ee <createTask>
-								createTask(blinkyTask2Function);
- 2cc:	87 ed       	ldi	r24, 0xD7	; 215
- 2ce:	90 e0       	ldi	r25, 0x00	; 0
- 2d0:	0e 94 f7 00 	call	0x1ee	; 0x1ee <createTask>
+	createTask(taskScheduler);
+ 2d8:	81 e9       	ldi	r24, 0x91	; 145
+ 2da:	91 e0       	ldi	r25, 0x01	; 1
+ 2dc:	0e 94 f3 00 	call	0x1e6	; 0x1e6 <createTask>
+	createTask(blinkyTaskFunction);
+ 2e0:	83 ed       	ldi	r24, 0xD3	; 211
+ 2e2:	90 e0       	ldi	r25, 0x00	; 0
+ 2e4:	0e 94 f3 00 	call	0x1e6	; 0x1e6 <createTask>
+	createTask(blinkyTask2Function);
+ 2e8:	85 ed       	ldi	r24, 0xD5	; 213
+ 2ea:	90 e0       	ldi	r25, 0x00	; 0
+ 2ec:	0e 94 f3 00 	call	0x1e6	; 0x1e6 <createTask>
 
-								tickTimerSetup();								
- 2d4:	0e 94 e4 00 	call	0x1c8	; 0x1c8 <tickTimerSetup>
-								sei();
- 2d8:	78 94       	sei
-								
-								taskArray[0].taskFunction();
- 2da:	e0 91 02 01 	lds	r30, 0x0102	; 0x800102 <_end+0x2>
- 2de:	f0 91 03 01 	lds	r31, 0x0103	; 0x800103 <_end+0x3>
- 2e2:	09 95       	icall
+	tickTimerSetup();
+ 2f0:	0e 94 e0 00 	call	0x1c0	; 0x1c0 <tickTimerSetup>
+	LOADSTATE();
+ 2f4:	0e 94 a2 00 	call	0x144	; 0x144 <LOADSTATE>
+	
 
-								/* Replace with your application code */
-								while (1)
-								{
-																i++;
- 2e4:	80 91 02 04 	lds	r24, 0x0402	; 0x800402 <_end+0x302>
- 2e8:	8f 5f       	subi	r24, 0xFF	; 255
- 2ea:	80 93 02 04 	sts	0x0402, r24	; 0x800402 <_end+0x302>
- 2ee:	fa cf       	rjmp	.-12     	; 0x2e4 <main+0x34>
+	/* Replace with your application code */
+	while (1)
+	{
+		i++;
+ 2f8:	80 91 02 04 	lds	r24, 0x0402	; 0x800402 <_end+0x302>
+ 2fc:	8f 5f       	subi	r24, 0xFF	; 255
+ 2fe:	80 93 02 04 	sts	0x0402, r24	; 0x800402 <_end+0x302>
+ 302:	fa cf       	rjmp	.-12     	; 0x2f8 <main+0x34>
 
-000002f0 <_exit>:
- 2f0:	f8 94       	cli
+00000304 <killTask>:
+	numberOfTasks++;// increment total number of tasks
+}
 
-000002f2 <__stop_program>:
- 2f2:	ff cf       	rjmp	.-2      	; 0x2f2 <__stop_program>
+void killTask(uint8_t taskId){
+	// verify its a real task and not the os
+	if(taskId >= numberOfTasks || taskId == 0) return;
+ 304:	90 91 01 04 	lds	r25, 0x0401	; 0x800401 <_end+0x301>
+ 308:	89 17       	cp	r24, r25
+ 30a:	50 f4       	brcc	.+20     	; 0x320 <killTask+0x1c>
+ 30c:	88 23       	and	r24, r24
+ 30e:	41 f0       	breq	.+16     	; 0x320 <killTask+0x1c>
+	taskArray[taskId].taskFunction = NULL;
+ 310:	90 e1       	ldi	r25, 0x10	; 16
+ 312:	89 9f       	mul	r24, r25
+ 314:	f0 01       	movw	r30, r0
+ 316:	11 24       	eor	r1, r1
+ 318:	e0 50       	subi	r30, 0x00	; 0
+ 31a:	ff 4f       	sbci	r31, 0xFF	; 255
+ 31c:	13 82       	std	Z+3, r1	; 0x03
+ 31e:	12 82       	std	Z+2, r1	; 0x02
+ 320:	08 95       	ret
+
+00000322 <taskScheduler>:
+
+// do all the task scheduling
+void taskScheduler(){
+	while (1)
+	{
+		cli();
+ 322:	f8 94       	cli
+		if(numberOfTasks == 3){
+ 324:	80 91 01 04 	lds	r24, 0x0401	; 0x800401 <_end+0x301>
+ 328:	83 30       	cpi	r24, 0x03	; 3
+ 32a:	59 f4       	brne	.+22     	; 0x342 <taskScheduler+0x20>
+			killTask(2);
+ 32c:	82 e0       	ldi	r24, 0x02	; 2
+ 32e:	0e 94 82 01 	call	0x304	; 0x304 <killTask>
+			createTask(blinkyTaskFunction);
+ 332:	83 ed       	ldi	r24, 0xD3	; 211
+ 334:	90 e0       	ldi	r25, 0x00	; 0
+ 336:	0e 94 f3 00 	call	0x1e6	; 0x1e6 <createTask>
+			createTask(blinkyTask2Function);
+ 33a:	85 ed       	ldi	r24, 0xD5	; 213
+ 33c:	90 e0       	ldi	r25, 0x00	; 0
+ 33e:	0e 94 f3 00 	call	0x1e6	; 0x1e6 <createTask>
+		}
+	
+		sei();
+ 342:	78 94       	sei
+	}
+ 344:	ee cf       	rjmp	.-36     	; 0x322 <taskScheduler>
+
+00000346 <incrementTask>:
+	taskArray[taskId].taskFunction = NULL;
+	
+		
+}
+
+void incrementTask(){
+ 346:	cf 93       	push	r28
+ 348:	df 93       	push	r29
+	while(1){
+		taskCounter = (taskCounter + 1) % numberOfTasks;
+ 34a:	c0 91 01 04 	lds	r28, 0x0401	; 0x800401 <_end+0x301>
+ 34e:	d0 e0       	ldi	r29, 0x00	; 0
+ 350:	20 91 00 04 	lds	r18, 0x0400	; 0x800400 <_end+0x300>
+ 354:	82 2f       	mov	r24, r18
+ 356:	90 e0       	ldi	r25, 0x00	; 0
+ 358:	01 96       	adiw	r24, 0x01	; 1
+ 35a:	be 01       	movw	r22, r28
+ 35c:	0e 94 c4 01 	call	0x388	; 0x388 <__divmodhi4>
+ 360:	28 2f       	mov	r18, r24
+ 362:	fc 01       	movw	r30, r24
+ 364:	ff 27       	eor	r31, r31
+		// if has a task function 
+		if(taskArray[taskCounter].taskFunction) break;
+ 366:	e2 95       	swap	r30
+ 368:	f2 95       	swap	r31
+ 36a:	f0 7f       	andi	r31, 0xF0	; 240
+ 36c:	fe 27       	eor	r31, r30
+ 36e:	e0 7f       	andi	r30, 0xF0	; 240
+ 370:	fe 27       	eor	r31, r30
+ 372:	e0 50       	subi	r30, 0x00	; 0
+ 374:	ff 4f       	sbci	r31, 0xFF	; 255
+ 376:	82 81       	ldd	r24, Z+2	; 0x02
+ 378:	93 81       	ldd	r25, Z+3	; 0x03
+ 37a:	89 2b       	or	r24, r25
+ 37c:	59 f3       	breq	.-42     	; 0x354 <incrementTask+0xe>
+ 37e:	20 93 00 04 	sts	0x0400, r18	; 0x800400 <_end+0x300>
+	}
+}
+ 382:	df 91       	pop	r29
+ 384:	cf 91       	pop	r28
+ 386:	08 95       	ret
+
+00000388 <__divmodhi4>:
+ 388:	97 fb       	bst	r25, 7
+ 38a:	07 2e       	mov	r0, r23
+ 38c:	16 f4       	brtc	.+4      	; 0x392 <__divmodhi4+0xa>
+ 38e:	00 94       	com	r0
+ 390:	07 d0       	rcall	.+14     	; 0x3a0 <__divmodhi4_neg1>
+ 392:	77 fd       	sbrc	r23, 7
+ 394:	09 d0       	rcall	.+18     	; 0x3a8 <__divmodhi4_neg2>
+ 396:	0e 94 d8 01 	call	0x3b0	; 0x3b0 <__udivmodhi4>
+ 39a:	07 fc       	sbrc	r0, 7
+ 39c:	05 d0       	rcall	.+10     	; 0x3a8 <__divmodhi4_neg2>
+ 39e:	3e f4       	brtc	.+14     	; 0x3ae <__divmodhi4_exit>
+
+000003a0 <__divmodhi4_neg1>:
+ 3a0:	90 95       	com	r25
+ 3a2:	81 95       	neg	r24
+ 3a4:	9f 4f       	sbci	r25, 0xFF	; 255
+ 3a6:	08 95       	ret
+
+000003a8 <__divmodhi4_neg2>:
+ 3a8:	70 95       	com	r23
+ 3aa:	61 95       	neg	r22
+ 3ac:	7f 4f       	sbci	r23, 0xFF	; 255
+
+000003ae <__divmodhi4_exit>:
+ 3ae:	08 95       	ret
+
+000003b0 <__udivmodhi4>:
+ 3b0:	aa 1b       	sub	r26, r26
+ 3b2:	bb 1b       	sub	r27, r27
+ 3b4:	51 e1       	ldi	r21, 0x11	; 17
+ 3b6:	07 c0       	rjmp	.+14     	; 0x3c6 <__udivmodhi4_ep>
+
+000003b8 <__udivmodhi4_loop>:
+ 3b8:	aa 1f       	adc	r26, r26
+ 3ba:	bb 1f       	adc	r27, r27
+ 3bc:	a6 17       	cp	r26, r22
+ 3be:	b7 07       	cpc	r27, r23
+ 3c0:	10 f0       	brcs	.+4      	; 0x3c6 <__udivmodhi4_ep>
+ 3c2:	a6 1b       	sub	r26, r22
+ 3c4:	b7 0b       	sbc	r27, r23
+
+000003c6 <__udivmodhi4_ep>:
+ 3c6:	88 1f       	adc	r24, r24
+ 3c8:	99 1f       	adc	r25, r25
+ 3ca:	5a 95       	dec	r21
+ 3cc:	a9 f7       	brne	.-22     	; 0x3b8 <__udivmodhi4_loop>
+ 3ce:	80 95       	com	r24
+ 3d0:	90 95       	com	r25
+ 3d2:	bc 01       	movw	r22, r24
+ 3d4:	cd 01       	movw	r24, r26
+ 3d6:	08 95       	ret
+
+000003d8 <_exit>:
+ 3d8:	f8 94       	cli
+
+000003da <__stop_program>:
+ 3da:	ff cf       	rjmp	.-2      	; 0x3da <__stop_program>

@@ -6,8 +6,10 @@
  *  Author: tchase
  */
   #include <avr/io.h>
-  .equ STARTOFTASKLIST_L, 0x00; task list memory start at 0x0100
-  .equ STARTOFTASKLIST_H, 0x01
+;  #include "task.h"
+;  .extern Task taskArray[16]
+  .equ STARTOFTASKLIST_L, 0x00;(taskArray)&0xff; task list memory start at 0x0100
+  .equ STARTOFTASKLIST_H, 0x01;(taskArray)>>8
 
   .equ STARTOFTASKSTATE_L, 0x00; saved processor states start at 0x0200
   .equ STARTOFTASKSTATE_H, 0x02
@@ -18,7 +20,6 @@
   .equ TASKCOUNTERADDR_L, 0x00
   .equ TASKCOUNTERADDR_H, 0x04
 
- .global LoadSTATE
 
  .global os
 os:
@@ -26,9 +27,9 @@ os:
 	sbi _SFR_IO_ADDR(PINB), 5
 	ret
 
-.global yeild
-yeild:
-  JMP yeild ; Spin.  This should do something more usefull later
+.global yield
+yield:
+  JMP yield ; Spin.  This should do something more usefull later
 
 
 .global TIMER4_COMPA_vect
@@ -97,15 +98,20 @@ TIMER4_COMPA_vect:
     ST Z+, R0
     ST Z+, R1
 
-   INC R17; increment task counter
-  CP R17, R18
-  BRLO TaskNotOverflowed ; brach if lower
-  CLR R17; if taskCounter >= numberOfTasks reset to task 0
-  TaskNotOverflowed:
+  call incrementTask
+
+;   INC R17; increment task counter
+;  CP R17, R18
+;  BRLO TaskNotOverflowed ; brach if lower
+;  CLR R17; if taskCounter >= numberOfTasks reset to task 0
+;  TaskNotOverflowed:
   LDI ZL, TASKCOUNTERADDR_L
   LDI ZH, TASKCOUNTERADDR_H
-  ST Z, R17
+  LD R17, Z
 
+  ; make C think this is a function that we can call 
+  ; its not its part of the ISR but this should magically fix things 
+  .global LOADSTATE
   LOADSTATE:
   ; Load saved state
     ; get saved SP

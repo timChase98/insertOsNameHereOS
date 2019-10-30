@@ -136,10 +136,13 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="os.s">
+    <Compile Include="os.S">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="task.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
