@@ -22,7 +22,16 @@ Discarded input sections
  .bss           0x00000000        0x0 main.o
  .text.killTask
                 0x00000000       0x1e main.o
+ .text.getSemi  0x00000000       0x20 main.o
+ .text.digitA   0x00000000       0x12 main.o
+ .text.digitB   0x00000000       0x10 main.o
+ .text.digitC   0x00000000       0x10 main.o
+ .text.digitD   0x00000000       0x10 main.o
  .text.Speaker  0x00000000       0x18 main.o
+ .text.LEDWhite
+                0x00000000       0x14 main.o
+ .text.semiphoreTestFunction
+                0x00000000        0xe main.o
  .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_divmodhi4.o)
  .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_divmodhi4.o)
  .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_divmodhi4.o)
@@ -326,53 +335,43 @@ END GROUP
                 0x00000144                LOADSTATE
                 0x000001a6                . = ALIGN (0x2)
  *(.text.*)
- .text.taskScheduler
-                0x000001a6       0xb8 main.o
-                0x000001a6                taskScheduler
- .text.blinkyTaskFunction
-                0x0000025e        0x4 main.o
-                0x0000025e                blinkyTaskFunction
  .text.blinkyTask2Function
-                0x00000262        0x4 main.o
-                0x00000262                blinkyTask2Function
- .text.digitA   0x00000266       0x12 main.o
-                0x00000266                digitA
- .text.digitB   0x00000278       0x10 main.o
-                0x00000278                digitB
- .text.digitC   0x00000288       0x10 main.o
-                0x00000288                digitC
- .text.digitD   0x00000298       0x10 main.o
-                0x00000298                digitD
+                0x000001a6        0x4 main.o
+                0x000001a6                blinkyTask2Function
  .text.semiphoreSetup
-                0x000002a8       0x12 main.o
-                0x000002a8                semiphoreSetup
+                0x000001aa       0x12 main.o
+                0x000001aa                semiphoreSetup
  .text.__vector_3
-                0x000002ba       0x9c main.o
-                0x000002ba                __vector_3
+                0x000001bc       0x9c main.o
+                0x000001bc                __vector_3
  .text.__vector_27
-                0x00000356       0x9c main.o
-                0x00000356                __vector_27
- .text.clrRam   0x000003f2       0x12 main.o
-                0x000003f2                clrRam
+                0x00000258       0x9c main.o
+                0x00000258                __vector_27
+ .text.clrRam   0x000002f4       0x12 main.o
+                0x000002f4                clrRam
  .text.tickTimerSetup
-                0x00000404       0x26 main.o
-                0x00000404                tickTimerSetup
+                0x00000306       0x26 main.o
+                0x00000306                tickTimerSetup
+ .text.initStackForTask
+                0x0000032c       0x40 main.o
+                0x0000032c                initStackForTask
  .text.createTask
-                0x0000042a       0xda main.o
-                0x0000042a                createTask
- .text.main     0x00000504       0xa2 main.o
-                0x00000504                main
+                0x0000036c       0xee main.o
+                0x0000036c                createTask
+ .text.main     0x0000045a       0x7e main.o
+                0x0000045a                main
+ .text.taskScheduler
+                0x000004d8       0xf4 main.o
+                0x000004d8                taskScheduler
  .text.incrementTask
-                0x000005a6       0x5c main.o
-                0x000005a6                incrementTask
- .text.getSemi  0x00000602       0x20 main.o
-                0x00000602                getSemi
- .text.LEDWhite
-                0x00000622       0x14 main.o
-                0x00000622                LEDWhite
- .text.semiphoreTestFunction
-                0x00000636        0xe main.o
-                0x00000636                semiphoreTestFunction
+                0x000005cc       0x5c main.o
+                0x000005cc                incrementTask
+ .text.yieldReady
+                0x00000628       0x16 main.o
+                0x00000628                yieldReady
+ .text.blinkyTaskFunction
+                0x0000063e        0x6 main.o
+                0x0000063e                blinkyTaskFunction
  .text.libgcc.div
                 0x00000644       0x28 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avr5\libgcc.a(_divmodhi4.o)
                 0x00000644                _div
@@ -503,47 +502,47 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000       0xd8
+.debug_aranges  0x00000000       0xe8
  *(.debug_aranges)
  .debug_aranges
                 0x00000000       0x20 os.o
  .debug_aranges
-                0x00000020       0xb8 main.o
+                0x00000020       0xc8 main.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000      0xf1b
+.debug_info     0x00000000      0xf31
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000      0x8ea C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega328pb/avr5/crtatmega328pb.o
  .debug_info    0x000008ea       0x5f os.o
- .debug_info    0x00000949      0x5d2 main.o
+ .debug_info    0x00000949      0x5e8 main.o
 
-.debug_abbrev   0x00000000      0xb02
+.debug_abbrev   0x00000000      0xb2c
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x86e C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega328pb/avr5/crtatmega328pb.o
  .debug_abbrev  0x0000086e       0x14 os.o
- .debug_abbrev  0x00000882      0x280 main.o
+ .debug_abbrev  0x00000882      0x2aa main.o
 
-.debug_line     0x00000000      0x979
+.debug_line     0x00000000      0x9aa
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x1a5 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega328pb/avr5/crtatmega328pb.o
  .debug_line    0x000001a5      0x2b3 os.o
- .debug_line    0x00000458      0x521 main.o
+ .debug_line    0x00000458      0x552 main.o
 
-.debug_frame    0x00000000      0x1d8
+.debug_frame    0x00000000      0x204
  *(.debug_frame)
- .debug_frame   0x00000000      0x1d8 main.o
+ .debug_frame   0x00000000      0x204 main.o
 
-.debug_str      0x00000000      0x662
+.debug_str      0x00000000      0x691
  *(.debug_str)
  .debug_str     0x00000000      0x318 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega328pb/avr5/crtatmega328pb.o
- .debug_str     0x00000318      0x34a main.o
-                                0x383 (size before relaxing)
+ .debug_str     0x00000318      0x379 main.o
+                                0x3b2 (size before relaxing)
 
-.debug_loc      0x00000000      0x432
+.debug_loc      0x00000000      0x434
  *(.debug_loc)
- .debug_loc     0x00000000      0x432 main.o
+ .debug_loc     0x00000000      0x434 main.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -563,9 +562,9 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000       0xa8
+.debug_ranges   0x00000000       0xb8
  *(.debug_ranges)
- .debug_ranges  0x00000000       0xa8 main.o
+ .debug_ranges  0x00000000       0xb8 main.o
 
 .debug_macro
  *(.debug_macro)

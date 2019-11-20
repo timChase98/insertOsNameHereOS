@@ -33,7 +33,9 @@ extern void yield();
 extern void LOADSTATE();
 
 //      void function named taskF with void parameter
-void createTask(void (*taskF)(void));
+
+void createTask(void (*taskF)(void), uint16_t priority);
+void initStackForTask(int taskId);
 void killTask(uint8_t taskId);
 void getSemi(uint8_t s);
 void semiphoreSetup();
@@ -59,6 +61,7 @@ uint8_t numberOfTasks __attribute__((address (0x401)));
 volatile uint8_t i __attribute__((address (0x402)));
 
 volatile uint64_t semis __attribute__((address (0x403)));
+volatile uint8_t ServicedTasks[16] __attribute__((address (0x404)));
 
 int main(void)
 {
@@ -77,16 +80,16 @@ int main(void)
 
 	
 
-	createTask(taskScheduler);
-	createTask(blinkyTaskFunction);
-	createTask(blinkyTask2Function);
-	createTask(semiphoreTestFunction);
-	
-	createTask(digitA);
-	createTask(digitB);
-	createTask(digitC);
-	createTask(digitD);
-	createTask(LEDWhite);
+	createTask(taskScheduler, 16);
+	createTask(blinkyTaskFunction, 16);
+	createTask(blinkyTask2Function, 16);
+// 	createTask(semiphoreTestFunction);
+// 	
+// 	createTask(digitA);
+// 	createTask(digitB);
+// 	createTask(digitC);
+// 	createTask(digitD);
+// 	createTask(LEDWhite);
 	//createTask(Speaker);
 	
 	tickTimerSetup();
@@ -139,7 +142,8 @@ void tickTimerSetup(){
 	TCNT4 = 0;
 }
 
-void createTask(void (*taskF)(void)){
+
+void createTask(void (*taskF)(void), uint16_t priority){
 	uint8_t firstOpenIndex = 0;
 	Task t;
 	
@@ -151,26 +155,29 @@ void createTask(void (*taskF)(void)){
 		
 	}
 	
-	t.taskID = numberOfTasks; // tasks start at 1
+	t.taskID = firstOpenIndex; // tasks start at 1
 	t.taskFunction = taskF;
-	t.placeHolder = (uint16_t *) 0xAABB;
+	t.roundsWithoutService = 0;
 	t.waitingFor = (uint16_t *) NONE;
-	t.placeHolder3 = (uint16_t *) 0xEEFF;
-	t.state = READY;
+	t.priority = (uint16_t *) priority;
+	t.state = RUNNING;
 	t.programCounter = taskF;
-	t.stackPointer = 0x043F + 64 * numberOfTasks - 34;
-	
+	t.stackPointer = 0x043F + 64 * firstOpenIndex - 34;
+	taskArray[numberOfTasks] = t;	
+
+	initStackForTask(firstOpenIndex);
+
+	numberOfTasks++;// increment total number of tasks
+}
+
+void initStackForTask(int taskId){
 	// sketchy hard coded pointer stuff
-	uint16_t defNotAPtrtoTaskF = taskF; // compilers suck
-	uint8_t* ptrToStackIntial = 0x043F + 64 * numberOfTasks -1;
+	taskArray[taskId].stackPointer = 0x043F + 64 * taskId - 34;
+	uint16_t defNotAPtrtoTaskF = taskArray[taskId].taskFunction; // compilers suck
+	uint8_t* ptrToStackIntial = 0x043F + 64 * taskId - 1;
 	*ptrToStackIntial = defNotAPtrtoTaskF >> 8;
 	ptrToStackIntial += 1;
 	*ptrToStackIntial = defNotAPtrtoTaskF & 0xFF;
-	
-
-	taskArray[numberOfTasks] = t;
-
-	numberOfTasks++;// increment total number of tasks
 }
 
 void killTask(uint8_t taskId){
@@ -182,16 +189,24 @@ void killTask(uint8_t taskId){
 }
 
 void incrementTask(){
+
 	while(1){
 		taskCounter = (taskCounter + 1) % numberOfTasks;
 		// if has a task function and is ready
-		if(taskArray[taskCounter].taskFunction && taskArray[taskCounter].state == READY) break;
+		if(taskArray[taskCounter].taskFunction && taskArray[taskCounter].state == RUNNING){
+			return;
+		}
 	}
 }
 
 void getSemi(uint8_t s){
 	taskArray[taskCounter].state = WAITING;
 	taskArray[taskCounter].waitingFor = s;
+}
+
+void yieldReady(){
+	taskArray[taskCounter].state = READY; 
+	while(1); // wait
 }
 
 // do all the task scheduling
@@ -202,11 +217,16 @@ void taskScheduler(){
 		for (i = 0; i < 16; i++)
 		{
 			if(taskArray[i].state == WAITING){
+			// if its waiting check if what its for is done 
 				if ((semis >> taskArray[i].waitingFor) & 0x01)
 				{
 					taskArray[i].waitingFor = NONE;
 					taskArray[i].state = READY;
 				}
+			}else if (taskArray[i].state == READY){
+			// if its ready make it running 
+				initStackForTask(i);
+				taskArray[i].state = RUNNING; 
 			}
 		}
 		
@@ -215,9 +235,9 @@ void taskScheduler(){
 }
 
 void blinkyTaskFunction(){
-	while (1) {
 		PORTB |= 1 << 5;
-	}
+		yieldReady(); 
+
 }
 void blinkyTask2Function(){
 	while (1) {
