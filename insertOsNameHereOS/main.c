@@ -60,8 +60,13 @@ uint8_t numberOfTasks __attribute__((address (0x401)));
 
 volatile uint8_t i __attribute__((address (0x402)));
 
-volatile uint64_t semis __attribute__((address (0x403)));
-volatile uint8_t ServicedTasks[16] __attribute__((address (0x404)));
+volatile uint8_t highestTaskNotServiced __attribute__((address (0x403)));
+volatile uint8_t highestpriorityNotServiced __attribute__((address (0x404)));
+volatile uint8_t highestPriority __attribute__((address (0x405))); 
+
+volatile Task* pTask  __attribute__((address (0x406)));
+
+volatile uint64_t semis __attribute__((address (0x408)));
 
 int main(void)
 {
@@ -80,9 +85,11 @@ int main(void)
 
 	
 
-	createTask(taskScheduler, 16);
+	createTask(taskScheduler, 0);
 	createTask(blinkyTaskFunction, 16);
-	createTask(blinkyTask2Function, 16);
+	createTask(blinkyTaskFunction, 14);
+	createTask(blinkyTask2Function, 15);
+	createTask(blinkyTask2Function, 13);
 // 	createTask(semiphoreTestFunction);
 // 	
 // 	createTask(digitA);
@@ -157,13 +164,15 @@ void createTask(void (*taskF)(void), uint16_t priority){
 	
 	t.taskID = firstOpenIndex; // tasks start at 1
 	t.taskFunction = taskF;
-	t.roundsWithoutService = 0;
+	t.servicedThisRound = 0;
 	t.waitingFor = (uint16_t *) NONE;
 	t.priority = (uint16_t *) priority;
 	t.state = RUNNING;
 	t.programCounter = taskF;
 	t.stackPointer = 0x043F + 64 * firstOpenIndex - 34;
 	taskArray[numberOfTasks] = t;	
+	
+	highestPriority = (priority > highestPriority) ? priority : highestPriority; 
 
 	initStackForTask(firstOpenIndex);
 
@@ -187,7 +196,7 @@ void killTask(uint8_t taskId){
 	
 	
 }
-
+/*
 void incrementTask(){
 
 	while(1){
@@ -197,6 +206,28 @@ void incrementTask(){
 			return;
 		}
 	}
+}
+*/
+
+void incrementTask(){
+	// find the highest priority unserviced task 
+	highestTaskNotServiced = 0;
+	highestpriorityNotServiced = 0;
+	// if everything has been serviced run the task scheduler 
+	taskCounter = 0; 
+	
+	// loop through all the tasks 
+	// if everything has been serviced 
+	for (i = 1; i < 16; i++){
+		pTask = &taskArray[i];
+		if(!(pTask->servicedThisRound) && pTask->priority > highestpriorityNotServiced){
+			taskCounter = i; 
+			highestpriorityNotServiced = pTask->priority;
+		}
+	}
+
+	taskArray[taskCounter].servicedThisRound = 1; 
+
 }
 
 void getSemi(uint8_t s){
@@ -216,17 +247,19 @@ void taskScheduler(){
 		cli();
 		for (i = 0; i < 16; i++)
 		{
-			if(taskArray[i].state == WAITING){
+			pTask = &taskArray[i];
+			pTask->servicedThisRound = 0; 
+			if(pTask->state == WAITING){
 			// if its waiting check if what its for is done 
-				if ((semis >> taskArray[i].waitingFor) & 0x01)
+				if ((semis >> pTask->waitingFor) & 0x01)
 				{
-					taskArray[i].waitingFor = NONE;
-					taskArray[i].state = READY;
+				pTask->waitingFor = NONE;
+					pTask->state = READY;
 				}
-			}else if (taskArray[i].state == READY){
+			}else if (pTask->state == READY){
 			// if its ready make it running 
 				initStackForTask(i);
-				taskArray[i].state = RUNNING; 
+				pTask->state = RUNNING; 
 			}
 		}
 		

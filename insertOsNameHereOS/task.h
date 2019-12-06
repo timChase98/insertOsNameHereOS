@@ -17,7 +17,7 @@ typedef struct
 
 	uint16_t taskID;
 	void (*taskFunction)(Task);
-	uint16_t roundsWithoutService;
+	uint16_t servicedThisRound;
 	uint16_t state;
 	uint16_t* stackPointer;
 	void (*programCounter)(Task);// stored as function so it mem aligns correctly
